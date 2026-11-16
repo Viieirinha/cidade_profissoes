@@ -19,6 +19,7 @@ const { rota, iniciar } = __r("js/core/roteador.js");
 const { toast, avisoModal } = __r("js/core/ui.js");
 const { aplicarAparencia } = __r("js/core/aparencia.js");
 const { paginaHome } = __r("js/paginas/home.js");
+const { paginaRelatorio } = __r("js/paginas/relatorio.js");
 const { paginaConfig } = __r("js/paginas/config.js");
 const { paginaEscritorio, paginaDetalhe, paginaForm, paginaDocumento } = __r("js/paginas/escritorio.js");
 
@@ -40,6 +41,7 @@ function iniciarApp() {
 
   rota('/', paginaHome);
   rota('/config', paginaConfig);
+  rota('/relatorio', paginaRelatorio);
   rota('/p/:prof', paginaEscritorio);
   rota('/p/:prof/r/:id', paginaDetalhe);
   rota('/p/:prof/novo/:tipo', paginaForm);
@@ -441,7 +443,7 @@ function paginaHome() {
     <section class="hero">
       <h1 tabindex="-1">${nome ? `Olá, ${esc(nome)}! 👋` : 'Bem-vinda à cidade! 👋'}</h1>
       <p>${esc(config.escritorio)} — escolha um prédio para começar a trabalhar.</p>
-      ${nome ? '' : '<p><a class="btn btn-primario" href="#/config">✏️ Dizer meu nome</a></p>'}
+      <p class="acoes">${nome ? '' : '<a class="btn btn-primario" href="#/config">✏️ Dizer meu nome</a>'}<a class="btn" href="#/relatorio">📊 Relatório da cidade</a></p>
       <ul class="estatisticas" aria-label="Seu progresso">
         <li><strong>${totalAtendimentos()}</strong> ${totalAtendimentos() === 1 ? 'atendimento' : 'atendimentos'}</li>
         <li><strong>${ganhos.length}</strong> ${ganhos.length === 1 ? 'selo' : 'selos'}</li>
@@ -1893,6 +1895,166 @@ __m.verificarSelos = verificarSelos;
 __m.incentivo = incentivo;
 };
 
+// ---- js/paginas/relatorio.js ----
+__defs["js/paginas/relatorio.js"] = function (__m, __r) {
+// Relatório geral da cidade: resumo de todas as profissões, pronto para imprimir ou salvar em PDF.
+const { PROFISSOES } = __r("js/professions/index.js");
+const { getEstado } = __r("js/core/storage.js");
+const { listar, maisRecentes } = __r("js/core/entidades.js");
+const { tituloReg } = __r("js/core/modelo.js");
+const { todosSelos, totalAtendimentos } = __r("js/core/selos.js");
+const { htmlFolha, imprimir } = __r("js/core/imprimir.js");
+const { esc, fmtData } = __r("js/core/ui.js");
+
+// "Profissional" fictícia só para o cabeçalho do relatório.
+const CIDADE = {
+  id: 'cidade', nome: 'Prefeitura', emoji: '🏙️', cor: '#c2185b',
+  local: 'Prefeitura da Cidade das Profissões, gestão da', cargo: 'Prefeita', sigla: 'CIDADE-BRINCA',
+};
+
+function paginaRelatorio() {
+  const estado = getEstado();
+  const linhas = PROFISSOES.map((p) => {
+    const cadastros = listar(p.id, p.entidades[0].id).length;
+    const atend = p.entidades[1] ? listar(p.id, p.entidades[1].id).length : 0;
+    return { p, cadastros, atend, docs: estado.contadores.documentos[p.id] || 0 };
+  });
+  const ativas = linhas.filter((l) => l.cadastros > 0).length;
+  const selos = todosSelos().filter((s) => s.ok);
+  const totalDocs = linhas.reduce((s, l) => s + l.docs, 0);
+
+  const recentes = PROFISSOES.flatMap((p) => p.entidades.slice(1, 2).flatMap((e) =>
+    listar(p.id, e.id).map((r) => ({ p, r }))))
+    .sort((a, b) => maisRecentes(a.r, b.r)).slice(0, 6);
+
+  const corpo = `
+    <p class="doc-campo"><strong>Cidade:</strong> ${esc(estado.config.escritorio)}</p>
+    <ul class="relatorio-numeros">
+      <li><strong>${ativas}</strong> de ${PROFISSOES.length} profissões em uso</li>
+      <li><strong>${totalAtendimentos()}</strong> atendimentos</li>
+      <li><strong>${totalDocs}</strong> documentos impressos</li>
+      <li><strong>${selos.length}</strong> selos</li>
+    </ul>
+    <section class="doc-bloco"><h4>Profissões</h4>
+      <table class="doc-tabela"><thead><tr><th>Profissão</th><th class="dir">Cadastros</th><th class="dir">Atendimentos</th><th class="dir">Documentos</th></tr></thead><tbody>
+      ${linhas.map((l) => `<tr><td>${l.p.emoji} ${esc(l.p.nome)}</td><td class="dir">${l.cadastros}</td><td class="dir">${l.atend}</td><td class="dir">${l.docs}</td></tr>`).join('')}
+      </tbody></table>
+    </section>
+    <section class="doc-bloco"><h4>Últimos atendimentos</h4>
+      ${recentes.length ? `<ul class="doc-lista">${recentes.map(({ p, r }) => `<li>${p.emoji} ${esc(p.nome)}: ${esc(tituloReg(p, r))}</li>`).join('')}</ul>` : '<p>Ainda não há atendimentos.</p>'}
+    </section>
+    <section class="doc-bloco"><h4>Selos conquistados</h4>
+      ${selos.length ? `<ul class="doc-lista doc-colunas">${selos.map((s) => `<li>${s.emoji} ${esc(s.titulo)} <small>(${esc(fmtData(estado.selos[s.id]))})</small></li>`).join('')}</ul>` : '<p>Ainda não há selos. Sem pressa! 🌈</p>'}
+    </section>
+    <p style="margin-top:.8rem"><em>Parabéns pelo trabalho! A cidade está cada dia mais animada. 🎉</em></p>`;
+
+  document.getElementById('app').innerHTML = `<section class="pagina-doc prof" style="--cor:${CIDADE.cor}">
+    <div class="barra-doc nao-imprimir">
+      <a class="btn" href="#/">← Voltar</a>
+      <label class="papel">Papel <select id="papel"><option>A4</option><option>A5</option></select></label>
+      <button class="btn btn-primario" id="imprimir" type="button">🖨️ Imprimir ou salvar PDF</button>
+    </div>
+    <h1 class="sr-only" tabindex="-1">Relatório geral da cidade</h1>
+    ${htmlFolha(CIDADE, 'Relatório geral da cidade', corpo)}
+  </section>`;
+
+  document.getElementById('imprimir').addEventListener('click', () => imprimir(document.getElementById('papel').value));
+}
+
+__m.paginaRelatorio = paginaRelatorio;
+};
+
+// ---- js/core/imprimir.js ----
+__defs["js/core/imprimir.js"] = function (__m, __r) {
+// Documentos imprimíveis: cabeçalho, logotipo SVG, carimbo e rodapé obrigatório de brincadeira.
+const { getEstado } = __r("js/core/storage.js");
+const { esc, fmtData, hoje } = __r("js/core/ui.js");
+
+const AVISO = 'Documento de brincadeira. Não tem valor médico, legal ou oficial.';
+const AVISO_SAUDE = 'Se alguém estiver doente de verdade, chame um adulto.';
+
+// Número de "registro profissional" sempre fictício (derivado do nome, só para enfeitar).
+function numeroFicticio(prof, nome) {
+  let h = 7;
+  for (const ch of prof.id + (nome || '')) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return `${prof.sigla} ${String(h % 100000).padStart(5, '0')}`;
+}
+
+function logoSVG(prof, tam = 56) {
+  return `<svg class="logo" width="${tam}" height="${tam}" viewBox="0 0 64 64" role="img" aria-label="Logotipo de ${esc(prof.nome)}">
+    <rect x="2" y="2" width="60" height="60" rx="16" fill="${prof.cor}"/>
+    <circle cx="32" cy="32" r="23" fill="#fff" opacity=".2"/>
+    <text x="32" y="43" font-size="29" text-anchor="middle">${prof.emoji}</text>
+  </svg>`;
+}
+
+function carimboSVG(prof) {
+  return `<svg class="carimbo" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+    <circle cx="60" cy="60" r="55" fill="none" stroke="${prof.cor}" stroke-width="4"/>
+    <circle cx="60" cy="60" r="46" fill="none" stroke="${prof.cor}" stroke-width="1.6" stroke-dasharray="4 3"/>
+    <text x="60" y="40" font-size="10" font-weight="700" fill="${prof.cor}" text-anchor="middle">CARIMBO DE</text>
+    <text x="60" y="53" font-size="10" font-weight="700" fill="${prof.cor}" text-anchor="middle">BRINCADEIRA</text>
+    <text x="60" y="88" font-size="30" text-anchor="middle">${prof.emoji}</text>
+  </svg>`;
+}
+
+function nomeJogadora() {
+  return getEstado().config.jogadora || 'Profissional Exemplo';
+}
+
+// Monta a folha completa. `corpo` já deve vir com todo texto escapado.
+function htmlFolha(prof, titulo, corpo) {
+  const jog = nomeJogadora();
+  const temNome = !!getEstado().config.jogadora;
+  const avisoSaude = prof.saude ? `<p class="aviso-saude">${esc(AVISO_SAUDE)}</p>` : '';
+  return `<article class="folha" style="--cor:${prof.cor}">
+    <header class="folha-cab">
+      ${logoSVG(prof, 60)}
+      <div class="folha-ident">
+        <h2 class="folha-nome">${esc(prof.local)} ${esc(jog)}</h2>
+        <p>${esc(prof.cargo)} ${esc(jog)} · ${esc(numeroFicticio(prof, jog))} <em>(registro fictício)</em></p>
+      </div>
+      <p class="folha-data">${esc(fmtData(hoje()))}</p>
+    </header>
+    <h3 class="folha-titulo">${esc(titulo)}</h3>
+    <div class="folha-corpo">${corpo}</div>
+    <div class="folha-assina">
+      <div class="assinatura">
+        <span class="linha"></span>
+        <strong class="assinatura-nome">${temNome ? `${esc(prof.cargo)} ${esc(jog)}` : 'Nome da profissional'}</strong>
+        <small>${esc(prof.nome)} · ${esc(numeroFicticio(prof, jog))} (registro fictício)</small>
+      </div>
+      ${carimboSVG(prof)}
+    </div>
+    <footer class="folha-rodape">
+      <p class="aviso-brincadeira">${esc(AVISO)}</p>
+      ${avisoSaude}
+    </footer>
+  </article>`;
+}
+
+function imprimir(papel = 'A4') {
+  let st = document.getElementById('estilo-pagina');
+  if (!st) {
+    st = document.createElement('style');
+    st.id = 'estilo-pagina';
+    document.head.appendChild(st);
+  }
+  st.textContent = `@page { size: ${papel === 'A5' ? 'A5' : 'A4'}; margin: 12mm; }`;
+  document.documentElement.dataset.papel = papel;
+  window.print();
+}
+
+__m.numeroFicticio = numeroFicticio;
+__m.logoSVG = logoSVG;
+__m.carimboSVG = carimboSVG;
+__m.nomeJogadora = nomeJogadora;
+__m.htmlFolha = htmlFolha;
+__m.imprimir = imprimir;
+__m.AVISO = AVISO;
+__m.AVISO_SAUDE = AVISO_SAUDE;
+};
+
 // ---- js/paginas/config.js ----
 __defs["js/paginas/config.js"] = function (__m, __r) {
 const { getEstado, salvar, substituirEstado, apagarTudo, CORES } = __r("js/core/storage.js");
@@ -2308,97 +2470,6 @@ __m.paginaEscritorio = paginaEscritorio;
 __m.paginaDetalhe = paginaDetalhe;
 __m.paginaForm = paginaForm;
 __m.paginaDocumento = paginaDocumento;
-};
-
-// ---- js/core/imprimir.js ----
-__defs["js/core/imprimir.js"] = function (__m, __r) {
-// Documentos imprimíveis: cabeçalho, logotipo SVG, carimbo e rodapé obrigatório de brincadeira.
-const { getEstado } = __r("js/core/storage.js");
-const { esc, fmtData, hoje } = __r("js/core/ui.js");
-
-const AVISO = 'Documento de brincadeira. Não tem valor médico, legal ou oficial.';
-const AVISO_SAUDE = 'Se alguém estiver doente de verdade, chame um adulto.';
-
-// Número de "registro profissional" sempre fictício (derivado do nome, só para enfeitar).
-function numeroFicticio(prof, nome) {
-  let h = 7;
-  for (const ch of prof.id + (nome || '')) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-  return `${prof.sigla} ${String(h % 100000).padStart(5, '0')}`;
-}
-
-function logoSVG(prof, tam = 56) {
-  return `<svg class="logo" width="${tam}" height="${tam}" viewBox="0 0 64 64" role="img" aria-label="Logotipo de ${esc(prof.nome)}">
-    <rect x="2" y="2" width="60" height="60" rx="16" fill="${prof.cor}"/>
-    <circle cx="32" cy="32" r="23" fill="#fff" opacity=".2"/>
-    <text x="32" y="43" font-size="29" text-anchor="middle">${prof.emoji}</text>
-  </svg>`;
-}
-
-function carimboSVG(prof) {
-  return `<svg class="carimbo" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
-    <circle cx="60" cy="60" r="55" fill="none" stroke="${prof.cor}" stroke-width="4"/>
-    <circle cx="60" cy="60" r="46" fill="none" stroke="${prof.cor}" stroke-width="1.6" stroke-dasharray="4 3"/>
-    <text x="60" y="40" font-size="10" font-weight="700" fill="${prof.cor}" text-anchor="middle">CARIMBO DE</text>
-    <text x="60" y="53" font-size="10" font-weight="700" fill="${prof.cor}" text-anchor="middle">BRINCADEIRA</text>
-    <text x="60" y="88" font-size="30" text-anchor="middle">${prof.emoji}</text>
-  </svg>`;
-}
-
-function nomeJogadora() {
-  return getEstado().config.jogadora || 'Profissional Exemplo';
-}
-
-// Monta a folha completa. `corpo` já deve vir com todo texto escapado.
-function htmlFolha(prof, titulo, corpo) {
-  const jog = nomeJogadora();
-  const temNome = !!getEstado().config.jogadora;
-  const avisoSaude = prof.saude ? `<p class="aviso-saude">${esc(AVISO_SAUDE)}</p>` : '';
-  return `<article class="folha" style="--cor:${prof.cor}">
-    <header class="folha-cab">
-      ${logoSVG(prof, 60)}
-      <div class="folha-ident">
-        <h2 class="folha-nome">${esc(prof.local)} ${esc(jog)}</h2>
-        <p>${esc(prof.cargo)} ${esc(jog)} · ${esc(numeroFicticio(prof, jog))} <em>(registro fictício)</em></p>
-      </div>
-      <p class="folha-data">${esc(fmtData(hoje()))}</p>
-    </header>
-    <h3 class="folha-titulo">${esc(titulo)}</h3>
-    <div class="folha-corpo">${corpo}</div>
-    <div class="folha-assina">
-      <div class="assinatura">
-        <span class="linha"></span>
-        <strong class="assinatura-nome">${temNome ? `${esc(prof.cargo)} ${esc(jog)}` : 'Nome da profissional'}</strong>
-        <small>${esc(prof.nome)} · ${esc(numeroFicticio(prof, jog))} (registro fictício)</small>
-      </div>
-      ${carimboSVG(prof)}
-    </div>
-    <footer class="folha-rodape">
-      <p class="aviso-brincadeira">${esc(AVISO)}</p>
-      ${avisoSaude}
-    </footer>
-  </article>`;
-}
-
-function imprimir(papel = 'A4') {
-  let st = document.getElementById('estilo-pagina');
-  if (!st) {
-    st = document.createElement('style');
-    st.id = 'estilo-pagina';
-    document.head.appendChild(st);
-  }
-  st.textContent = `@page { size: ${papel === 'A5' ? 'A5' : 'A4'}; margin: 12mm; }`;
-  document.documentElement.dataset.papel = papel;
-  window.print();
-}
-
-__m.numeroFicticio = numeroFicticio;
-__m.logoSVG = logoSVG;
-__m.carimboSVG = carimboSVG;
-__m.nomeJogadora = nomeJogadora;
-__m.htmlFolha = htmlFolha;
-__m.imprimir = imprimir;
-__m.AVISO = AVISO;
-__m.AVISO_SAUDE = AVISO_SAUDE;
 };
 
 __r("js/app.js");

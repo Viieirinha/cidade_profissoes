@@ -37,7 +37,7 @@ export function paginaHome() {
     <section class="hero">
       <h1 tabindex="-1">${nome ? `Olá, ${esc(nome)}! 👋` : 'Bem-vinda à cidade! 👋'}</h1>
       <p>${esc(config.escritorio)} — escolha um prédio para começar a trabalhar.</p>
-      ${nome ? '' : '<p><a class="btn btn-primario" href="#/config">✏️ Dizer meu nome</a></p>'}
+      <p class="acoes">${nome ? '' : '<a class="btn btn-primario" href="#/config">✏️ Dizer meu nome</a>'}<a class="btn" href="#/relatorio">📊 Relatório da cidade</a></p>
       <ul class="estatisticas" aria-label="Seu progresso">
         <li><strong>${totalAtendimentos()}</strong> ${totalAtendimentos() === 1 ? 'atendimento' : 'atendimentos'}</li>
         <li><strong>${ganhos.length}</strong> ${ganhos.length === 1 ? 'selo' : 'selos'}</li>

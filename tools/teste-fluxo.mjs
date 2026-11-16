@@ -126,6 +126,14 @@ async function rodar(nome, url) {
   }
   ok(true, 'todos os documentos de exemplo têm o aviso de brincadeira');
 
+  // Relatório geral da cidade
+  await page.goto(`${url}#/relatorio`);
+  await page.waitForSelector('.folha');
+  const rel = await page.locator('.folha').innerText();
+  ok(rel.includes(AVISO) && rel.includes('Assinatura') === false && rel.includes('Prefeita'), 'relatório da cidade tem cabeçalho, assinatura e aviso de brincadeira');
+  ok(await page.locator('.folha .doc-tabela tbody tr').count() === 11, 'relatório lista as 11 profissões');
+  ok(/\d+\s*atendimentos/.test(rel.replace(/\n/g, ' ')), 'relatório mostra total de atendimentos');
+
   // Detetive: quadro de pistas
   await page.goto(`${url}#/p/detetive`);
   await page.click('#lista li a');

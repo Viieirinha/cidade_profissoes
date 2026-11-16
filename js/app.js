@@ -4,6 +4,7 @@ import { rota, iniciar } from './core/roteador.js';
 import { toast, avisoModal } from './core/ui.js';
 import { aplicarAparencia } from './core/aparencia.js';
 import { paginaHome } from './paginas/home.js';
+import { paginaRelatorio } from './paginas/relatorio.js';
 import { paginaConfig } from './paginas/config.js';
 import { paginaEscritorio, paginaDetalhe, paginaForm, paginaDocumento } from './paginas/escritorio.js';
 
@@ -25,6 +26,7 @@ function iniciarApp() {
 
   rota('/', paginaHome);
   rota('/config', paginaConfig);
+  rota('/relatorio', paginaRelatorio);
   rota('/p/:prof', paginaEscritorio);
   rota('/p/:prof/r/:id', paginaDetalhe);
   rota('/p/:prof/novo/:tipo', paginaForm);
