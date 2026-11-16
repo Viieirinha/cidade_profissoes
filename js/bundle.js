@@ -1908,8 +1908,8 @@ const { esc, fmtData } = __r("js/core/ui.js");
 
 // "Profissional" fictícia só para o cabeçalho do relatório.
 const CIDADE = {
-  id: 'cidade', nome: 'Prefeitura', emoji: '🏙️', cor: '#c2185b',
-  local: 'Prefeitura da Cidade das Profissões, gestão da', cargo: 'Prefeita', sigla: 'CIDADE-BRINCA',
+  id: 'cidade', nome: 'Direção', emoji: '🏙️', cor: '#c2185b',
+  local: 'Direção da Cidade das Profissões, gestão da', cargo: 'Diretora', sigla: 'CIDADE-BRINCA',
 };
 
 function paginaRelatorio() {

@@ -130,7 +130,7 @@ async function rodar(nome, url) {
   await page.goto(`${url}#/relatorio`);
   await page.waitForSelector('.folha');
   const rel = await page.locator('.folha').innerText();
-  ok(rel.includes(AVISO) && rel.includes('Assinatura') === false && rel.includes('Prefeita'), 'relatório da cidade tem cabeçalho, assinatura e aviso de brincadeira');
+  ok(rel.includes(AVISO) && rel.includes('Assinatura') === false && rel.includes('Diretora'), 'relatório da cidade tem cabeçalho, assinatura e aviso de brincadeira');
   ok(await page.locator('.folha .doc-tabela tbody tr').count() === 11, 'relatório lista as 11 profissões');
   ok(/\d+\s*atendimentos/.test(rel.replace(/\n/g, ' ')), 'relatório mostra total de atendimentos');
 
