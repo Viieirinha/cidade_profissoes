@@ -161,8 +161,10 @@ button.dente:hover { border-color: var(--destaque); }
 .doc-colunas { column-count: 2; column-gap: 1.2rem; }
 .doc-colunas li { break-inside: avoid; }
 @media (max-width: 560px) { .doc-colunas { column-count: 1; } }
-.doc-tabela { width: 100%; border-collapse: collapse; margin: .5rem 0; }
-.doc-tabela th, .doc-tabela td { border: 1px solid #c9c1d3; padding: .35rem .5rem; text-align: left; }
+.doc-tabela { width: 100%; border-collapse: separate; border-spacing: 0; margin: .5rem 0; border: 1px solid #c9c1d3; border-radius: 8px; overflow: hidden; }
+.doc-tabela th, .doc-tabela td { border-right: 1px solid #c9c1d3; border-bottom: 1px solid #c9c1d3; padding: .35rem .5rem; text-align: left; }
+.doc-tabela th:last-child, .doc-tabela td:last-child { border-right: 0; }
+.doc-tabela tr:last-child > th, .doc-tabela tr:last-child > td { border-bottom: 0; }
 .doc-tabela th { background: color-mix(in srgb, var(--cor) 14%, #fff); }
 .doc-tabela .dir { text-align: right; }
 .folha-assina { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-top: 1.4rem; }
@@ -170,7 +172,7 @@ button.dente:hover { border-color: var(--destaque); }
 .assinatura .linha { border-bottom: 1.5px solid #1d1a22; height: 2.6rem; }
 .assinatura-nome { margin-top: .2rem; }
 .assinatura small { color: #4a4057; }
-.carimbo { width: 96px; height: 96px; transform: rotate(-8deg); opacity: .85; }
+.carimbo { width: 96px; height: 96px; transform: rotate(-8deg); opacity: .85; margin-right: 8px; }
 .logo { flex: none; }
 .folha-rodape { margin-top: 1rem; border-top: 1px dashed #b9b0c4; padding-top: .5rem; text-align: center; font-size: .85rem; }
 .folha-rodape p { margin: .15rem 0; }
