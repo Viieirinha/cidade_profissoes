@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR" data-tema="claro" data-cor="rosa">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cidade das Profissões</title>
+  <meta name="description" content="Um escritório de faz de conta onde você brinca de ter profissões.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%99%EF%B8%8F%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/tema.css">
+  <link rel="stylesheet" href="css/componentes.css">
+  <link rel="stylesheet" href="css/impressao.css">
+  <script>
+    // Aplica tema e cor antes de desenhar a página (evita "piscar").
+    try {
+      var c = JSON.parse(localStorage.getItem('cidade-das-profissoes') || '{}').config || {};
+      if (c.tema) document.documentElement.dataset.tema = c.tema;
+      if (c.cor) document.documentElement.dataset.cor = c.cor;
+    } catch (e) { /* sem armazenamento: usa o padrão */ }
+  </script>
+</head>
+<body>
+  <a class="pular nao-imprimir" href="#principal" onclick="document.getElementById('principal').focus();return false;">Pular para o conteúdo</a>
+  <header class="topo nao-imprimir">
+    <a class="marca" href="#/"><span aria-hidden="true">🏙️</span> <span id="nome-escritorio">Cidade das Profissões</span></a>
+    <nav aria-label="Principal">
+      <a href="#/">Início</a>
+      <a href="#/config"><span aria-hidden="true">⚙️</span> Configurações</a>
+    </nav>
+  </header>
+  <main id="principal" tabindex="-1"><div id="app"><p class="carregando">Carregando a cidade… 🏙️</p></div></main>
+  <footer class="rodape-site nao-imprimir">
+    <p>🎈 Brincadeira de faz de conta. Os dados ficam só neste aparelho.</p>
+  </footer>
+  <div id="toasts" aria-live="polite" class="nao-imprimir"></div>
+  <noscript><p style="padding:1rem">Este sistema precisa de JavaScript para funcionar.</p></noscript>
+  <script>
+    // Em http(s) usa módulos ES. Abrindo o arquivo direto (file://) o navegador bloqueia
+    // módulos, então usa js/bundle.js (gerado por tools/gerar-bundle.mjs).
+    (function () {
+      var s = document.createElement('script');
+      if (location.protocol === 'file:') { s.src = 'js/bundle.js'; }
+      else { s.type = 'module'; s.src = 'js/app.js'; }
+      s.onerror = function () { document.getElementById('app').textContent = 'Não consegui carregar o sistema.'; };
+      document.body.appendChild(s);
+    })();
+  </script>
+</body>
+</html>
