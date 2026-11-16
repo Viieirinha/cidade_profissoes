@@ -69,7 +69,7 @@ Todos os caminhos são relativos, então funciona em subpastas como `/NOME-DO-RE
 
 ```
 index.html
-css/            tema.css (cores, modo escuro) · componentes.css · impressao.css (@media print, A4/A5)
+css/            tema.css (cores, modo escuro) · componentes.css · visual.css (acabamento: prédios, brilhos) · impressao.css (@media print, A4/A5)
 js/
   app.js        ponto de entrada e rotas
   bundle.js     GERADO (para abrir via file://) — rode tools/gerar-bundle.mjs
