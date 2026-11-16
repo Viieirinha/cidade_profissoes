@@ -430,8 +430,8 @@ function paginaHome() {
       <p>${esc(config.escritorio)} — escolha um prédio para começar a trabalhar.</p>
       ${nome ? '' : '<p><a class="btn btn-primario" href="#/config">✏️ Dizer meu nome</a></p>'}
       <ul class="estatisticas" aria-label="Seu progresso">
-        <li><strong>${totalAtendimentos()}</strong> atendimentos</li>
-        <li><strong>${ganhos.length}</strong> selos</li>
+        <li><strong>${totalAtendimentos()}</strong> ${totalAtendimentos() === 1 ? 'atendimento' : 'atendimentos'}</li>
+        <li><strong>${ganhos.length}</strong> ${ganhos.length === 1 ? 'selo' : 'selos'}</li>
       </ul>
     </section>
     <section aria-labelledby="t-predios">
