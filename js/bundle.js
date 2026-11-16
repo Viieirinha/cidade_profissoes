@@ -2351,6 +2351,7 @@ function nomeJogadora() {
 // Monta a folha completa. `corpo` já deve vir com todo texto escapado.
 function htmlFolha(prof, titulo, corpo) {
   const jog = nomeJogadora();
+  const temNome = !!getEstado().config.jogadora;
   const avisoSaude = prof.saude ? `<p class="aviso-saude">${esc(AVISO_SAUDE)}</p>` : '';
   return `<article class="folha" style="--cor:${prof.cor}">
     <header class="folha-cab">
@@ -2364,7 +2365,11 @@ function htmlFolha(prof, titulo, corpo) {
     <h3 class="folha-titulo">${esc(titulo)}</h3>
     <div class="folha-corpo">${corpo}</div>
     <div class="folha-assina">
-      <div class="assinatura"><span class="linha"></span><small>Assinatura de ${esc(jog)}</small></div>
+      <div class="assinatura">
+        <span class="linha"></span>
+        <strong class="assinatura-nome">${temNome ? `${esc(prof.cargo)} ${esc(jog)}` : 'Nome da profissional'}</strong>
+        <small>${esc(prof.nome)} · ${esc(numeroFicticio(prof, jog))} (registro fictício)</small>
+      </div>
       ${carimboSVG(prof)}
     </div>
     <footer class="folha-rodape">

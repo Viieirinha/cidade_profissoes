@@ -62,6 +62,7 @@ async function rodar(nome, url) {
   ok(folha.includes('Se alguém estiver doente de verdade, chame um adulto.'), 'receita traz aviso de chamar um adulto');
   ok(folha.includes('Abraço apertado') && folha.includes('Dança da chuva'), 'receita lista itens de faz de conta');
   ok(/fictício/.test(folha), 'registro profissional é marcado como fictício');
+  ok(folha.includes('Nome da profissional'), 'sem nome definido, a assinatura fica em branco para preencher');
   await page.emulateMedia({ media: 'print' });
   ok(!(await page.locator('.topo').isVisible()), 'menu some na impressão');
   ok(await page.locator('.folha-rodape').isVisible(), 'rodapé visível na impressão');

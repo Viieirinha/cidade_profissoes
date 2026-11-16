@@ -161,7 +161,9 @@ button.dente:hover { border-color: var(--destaque); }
 .doc-tabela .dir { text-align: right; }
 .folha-assina { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-top: 1.4rem; }
 .assinatura { flex: 1; max-width: 300px; display: flex; flex-direction: column; }
-.assinatura .linha { border-bottom: 1.5px solid #1d1a22; height: 2.2rem; }
+.assinatura .linha { border-bottom: 1.5px solid #1d1a22; height: 2.6rem; }
+.assinatura-nome { margin-top: .2rem; }
+.assinatura small { color: #4a4057; }
 .carimbo { width: 96px; height: 96px; transform: rotate(-8deg); opacity: .85; }
 .logo { flex: none; }
 .folha-rodape { margin-top: 1rem; border-top: 1px dashed #b9b0c4; padding-top: .5rem; text-align: center; font-size: .85rem; }
