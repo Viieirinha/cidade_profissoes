@@ -1,0 +1,66 @@
+import { txt, area, data, sel, emoji } from '../core/campos.js';
+import { fmtData } from '../core/ui.js';
+
+const EDITORIAS = ['Cidade', 'Esportes', 'Cultura', 'Ciência', 'Bichinhos', 'Culinária', 'Brincadeiras'];
+
+export default {
+  id: 'jornalista',
+  nome: 'Jornalista',
+  emoji: '📰',
+  cor: '#283593',
+  local: 'Redação do Jornal',
+  cargo: 'Jornalista',
+  sigla: 'JORN-BRINCA',
+  descricao: 'Matérias e a primeira página do seu jornal',
+  selos: { cadastro: 'Primeira edição criada!', atendimento: 'Primeira matéria escrita!' },
+  entidades: [
+    {
+      id: 'edicao', nome: 'Edição', plural: 'Edições do jornal', emoji: '🗞️', f: true, titulo: 'nome', subtitulo: (d) => (d.data ? fmtData(d.data) : ''),
+      campos: [
+        txt('nome', 'Nome do jornal', { obrigatorio: true, dica: 'Ex.: O Diário da Cidade' }),
+        data('data', 'Data da edição', { padrao: 'hoje' }),
+        txt('lema', 'Lema do jornal', { dica: 'Ex.: Notícias fofas todo dia' }),
+      ],
+    },
+    {
+      id: 'materia', nome: 'Matéria', plural: 'Matérias', emoji: '✍️', f: true, titulo: 'titulo', subtitulo: (d) => [d.editoria, d.destaque].filter(Boolean).join(' · '),
+      campos: [
+        txt('titulo', 'Título (manchete)', { obrigatorio: true, max: 90, dica: 'Ex.: Gato derruba vaso e jura inocência' }),
+        txt('linhaFina', 'Linha fina (resumo curto)', { max: 140 }),
+        area('texto', 'Texto da matéria', { linhas: 6, max: 2000 }),
+        txt('cena', 'Foto desenhada com emojis', { max: 12, dica: 'Ex.: 🐱🌳☀️', ajuda: 'Monte uma cena com até 5 emojis.' }),
+        sel('editoria', 'Editoria', EDITORIAS, { metade: true }),
+        sel('destaque', 'Destaque', ['Matéria principal', 'Matéria secundária'], { metade: true }),
+      ],
+    },
+  ],
+  documentos: [
+    {
+      id: 'primeira-pagina', titulo: 'Primeira página', de: 'edicao', botao: '🖨️ Primeira página',
+      render: (c) => {
+        const ms = c.filhos('materia');
+        const principal = ms.find((m) => m.dados.destaque === 'Matéria principal') || ms[0];
+        const outras = ms.filter((m) => m !== principal);
+        return `<h4 class="jornal-nome">${c.e(c.d.nome)}</h4>
+          <div class="jornal-linha"><span>${c.e(c.data(c.d.data))}</span><span>${c.e(c.d.lema || '')}</span><span>Edição de brincadeira</span></div>
+          ${principal ? `<div class="jornal-principal"><div class="jornal-foto" aria-hidden="true">${c.e(principal.dados.cena || '📰')}</div>
+            <h4>${c.e(principal.dados.titulo)}</h4><p><em>${c.e(principal.dados.linhaFina || '')}</em></p><p>${c.par(principal.dados.texto || '')}</p></div>` : '<p>Escreva matérias para montar a página!</p>'}
+          <div class="jornal-colunas">${outras.map((m) => `<article><div aria-hidden="true">${c.e(m.dados.cena || '')}</div><small>${c.e(m.dados.editoria || '')}</small>
+            <h5>${c.e(m.dados.titulo)}</h5><p><em>${c.e(m.dados.linhaFina || '')}</em></p><p>${c.par(m.dados.texto || '')}</p></article>`).join('')}</div>`;
+      },
+    },
+    {
+      id: 'materia-doc', titulo: 'Matéria', de: 'materia', botao: '🖨️ Matéria',
+      render: (c) => `<div class="jornal-principal"><div class="jornal-foto" aria-hidden="true">${c.e(c.d.cena || '📰')}</div>
+        <h4>${c.e(c.d.titulo)}</h4><p><em>${c.e(c.d.linhaFina || '')}</em></p></div>
+        <p>${c.par(c.d.texto || '')}</p>${c.campo('Editoria', c.d.editoria)}`,
+    },
+  ],
+  exemplo: [{
+    tipo: 'edicao', dados: { nome: 'O Diário da Cidade', lema: 'Notícias fofas todo dia' },
+    filhos: [
+      { tipo: 'materia', dados: { titulo: 'Gato derruba vaso e jura inocência', linhaFina: 'Testemunhas viram apenas um rabinho balançando.', texto: 'Na tarde de ontem, um vaso de flores foi ao chão. O gato nega tudo.', cena: '🐱🌷', editoria: 'Bichinhos', destaque: 'Matéria principal' } },
+      { tipo: 'materia', dados: { titulo: 'Festival do brigadeiro bate recorde', linhaFina: 'Foram mais de mil colheres de alegria.', texto: 'A festa foi um sucesso e ninguém saiu sem sorriso.', cena: '🍫🎉', editoria: 'Culinária', destaque: 'Matéria secundária' } },
+    ],
+  }],
+};
