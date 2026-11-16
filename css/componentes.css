@@ -18,7 +18,8 @@
 .btn-primario { background: var(--destaque); color: var(--sobre-destaque); }
 .btn-primario:hover { background: var(--destaque); filter: brightness(1.08); }
 .btn-pequeno { min-height: 40px; padding: .35rem .9rem; font-size: .95rem; }
-.btn-doc { background: var(--destaque-fraco); }
+.btn-doc { background: var(--superficie); }
+.btn-doc:hover { background: var(--destaque-fraco); }
 .btn-perigo, .btn-perigo-suave { border-color: var(--perigo); color: var(--perigo); }
 .btn-perigo { background: var(--perigo); color: #fff; }
 :root[data-tema="escuro"] .btn-perigo { color: #260a08; }
@@ -84,7 +85,7 @@ input[type="text"], input[type="number"], input[type="date"], input[type="time"]
 textarea { resize: vertical; }
 input:focus, select:focus, textarea:focus { border-color: var(--destaque); }
 .ajuda { color: var(--texto-suave); font-size: .88rem; }
-.form-secao { flex: 1 1 100%; margin: .6rem 0 0; padding-bottom: .2rem; border-bottom: 2px solid var(--destaque-fraco); color: var(--destaque); }
+.form-secao { flex: 1 1 100%; font-size: 1.1rem; margin: .6rem 0 0; padding-bottom: .2rem; border-bottom: 2px solid var(--destaque-fraco); color: var(--destaque); }
 .acoes-form { flex: 1 1 100%; margin-bottom: 0; }
 
 /* Chips */
@@ -129,7 +130,7 @@ button.dente:hover { border-color: var(--destaque); }
 /* Selos */
 .selos { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: .5rem; }
 .selo { background: var(--destaque-fraco); border: 1px solid var(--borda); border-radius: 999px; padding: .3rem .9rem; font-weight: 600; }
-.selo-bloqueado { opacity: .6; font-weight: 400; }
+.selo-bloqueado { background: transparent; border-style: dashed; color: var(--texto-suave); font-weight: 400; }
 
 /* Configurações */
 .cartao-bloco { background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); padding: 1rem; margin: 1rem 0; box-shadow: var(--sombra); display: flex; flex-direction: column; gap: .8rem; }
@@ -189,3 +190,15 @@ button.dente:hover { border-color: var(--destaque); }
 .toast { background: var(--texto); color: var(--bg); padding: .7rem 1.1rem; border-radius: 14px; box-shadow: var(--sombra); max-width: 520px; font-weight: 600; }
 
 @media (max-width: 480px) { main { padding: .8rem .8rem 2rem; } .btn { width: auto; } .acoes .btn { flex: 1 1 auto; } }
+
+/* Modo de alto contraste do sistema (Windows etc.) */
+@media (forced-colors: active) {
+  .chip input:checked + span { border-color: Highlight; outline: 3px solid Highlight; }
+  .chip input:focus-visible + span, :focus-visible { outline: 3px solid CanvasText; }
+  .btn, .chip span, .predio, .cartao-item { border: 2px solid ButtonText; }
+  .dente { border: 2px solid ButtonText; }
+}
+
+/* A folha é sempre branca (como o papel), mesmo no modo escuro */
+.folha .odonto-legenda, .folha .dente small, .folha .odonto-rotulo { color: #4a4057; }
+.folha .dente { background: #fff; color: #1d1a22; border-color: #c9c1d3; }

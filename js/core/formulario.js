@@ -26,7 +26,7 @@ export function htmlOdontograma(estados, interativo) {
     <p class="odonto-rotulo">Em cima</p><div class="odonto-linha">${linha(0)}</div>
     <p class="odonto-rotulo">Embaixo</p><div class="odonto-linha">${linha(16)}</div>
     <ul class="odonto-legenda">${legenda}</ul>
-    ${interativo ? '<p class="ajuda">Toque num dente para mudar como ele está.</p>' : ''}
+    ${interativo ? '<p class="ajuda">Toque num dente para mudar como ele está.</p><p class="sr-only" role="status" data-odonto-aviso></p>' : ''}
   </div>`;
 }
 
@@ -77,7 +77,7 @@ function sugestoesTexto(c, id) {
 }
 
 export function htmlCampo(c, valor, ctx = {}) {
-  if (c.tipo === 'secao') return `<h3 class="form-secao">${esc(c.rotulo)}</h3>`;
+  if (c.tipo === 'secao') return `<h2 class="form-secao">${esc(c.rotulo)}</h2>`;
   const id = 'f-' + c.nome;
   const v = valor === undefined ? valorPadrao(c) : valor;
   const req = c.obrigatorio ? ' required' : '';
@@ -217,7 +217,10 @@ export function ligarFormulario(form) {
       b.dataset.estado = prox;
       const [em, nome] = ESTADOS_DENTE[prox];
       b.firstElementChild.textContent = em;
-      b.setAttribute('aria-label', `Dente ${b.querySelector('small').textContent}: ${nome}`);
+      const texto = `Dente ${b.querySelector('small').textContent}: ${nome}`;
+      b.setAttribute('aria-label', texto);
+      const aviso = form.querySelector('[data-odonto-aviso]');
+      if (aviso) aviso.textContent = texto;
     } else if (b.hasAttribute('data-add')) {
       adicionarChip(b.closest('.chip-novo'));
     } else if (b.dataset.sug !== undefined) {

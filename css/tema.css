@@ -67,3 +67,7 @@ h1:focus { outline: none; }
 .pular { position: absolute; left: -999px; top: 0; background: var(--destaque); color: var(--sobre-destaque); padding: .6rem 1rem; z-index: 100; }
 .pular:focus { left: .5rem; top: .5rem; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* Cores das profissões só no modo claro; no escuro vale a cor de destaque clara do tema (contraste). */
+:root[data-tema="claro"] .prof { --destaque: var(--cor); --sobre-destaque: #ffffff; --destaque-fraco: color-mix(in srgb, var(--cor) 12%, #ffffff); }
+.topo nav a[aria-current="page"] { background: var(--destaque-fraco); }

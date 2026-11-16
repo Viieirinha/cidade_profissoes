@@ -96,6 +96,13 @@ node tools/teste-fluxo.mjs     # precisa do Playwright; abre http e file://
 O teste cadastra uma paciente, gera a receita, confere o aviso de brincadeira em **todos** os documentos,
 testa XSS, backup (exportar → apagar → importar), tema escuro e confirma **zero erros no console e zero requisições externas**.
 
+## Acessibilidade
+
+- Teclado: link "Pular para o conteúdo", foco visível, foco no título a cada troca de página, chips e dentes operáveis com Espaço/Enter.
+- Leitores de tela: rótulos em todos os campos, `aria-current` no menu, título da aba por página, avisos em região viva (toasts, odontograma).
+- Contraste: auditado com axe-core (WCAG 2.1 AA) em claro e escuro, em todas as cores de destaque e nas páginas de cada tipo. Para repetir: `node tools/auditar-acessibilidade.mjs CAMINHO/axe.min.js`.
+- Botões e alvos de toque com pelo menos 40–48 px, `prefers-reduced-motion` e modo de alto contraste (`forced-colors`) respeitados.
+
 ## Privacidade e segurança
 
 - Nenhum dado sai do aparelho. Sem upload de fotos (use emojis e desenhos simples).

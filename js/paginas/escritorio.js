@@ -69,7 +69,7 @@ export function paginaEscritorio({ params }) {
   const regs = listar(prof.id, raiz.id).sort(maisRecentes);
   const recentes = atend ? listar(prof.id, atend.id).sort(maisRecentes).slice(0, 4) : [];
 
-  app().innerHTML = `<section class="escritorio" style="--cor:${prof.cor}; --destaque:${prof.cor}; --sobre-destaque:#fff">
+  app().innerHTML = `<section class="escritorio prof" style="--cor:${prof.cor}">
     <nav class="migalhas" aria-label="Você está aqui"><a href="#/">🏠 Início</a> › <span>${esc(prof.nome)}</span></nav>
     <h1 tabindex="-1"><span aria-hidden="true">${prof.emoji}</span> Escritório: ${esc(prof.nome)}</h1>
     <p class="subtitulo">${esc(prof.descricao || '')}</p>
@@ -133,7 +133,7 @@ export function paginaDetalhe({ params }) {
   }).join('');
 
   const voltar = pai ? `#/p/${prof.id}/r/${pai.id}` : `#/p/${prof.id}`;
-  app().innerHTML = `<section class="detalhe" style="--cor:${prof.cor}; --destaque:${prof.cor}; --sobre-destaque:#fff">
+  app().innerHTML = `<section class="detalhe prof" style="--cor:${prof.cor}">
     <nav class="migalhas" aria-label="Você está aqui"><a href="#/">🏠 Início</a> › <a href="#/p/${prof.id}">${esc(prof.nome)}</a>${pai ? ` › <a href="${voltar}">${esc(tituloReg(prof, pai))}</a>` : ''} › <span>${esc(tituloReg(prof, reg))}</span></nav>
     <h1 tabindex="-1"><span aria-hidden="true">${esc(reg.dados.emoji || en.emoji)}</span> ${esc(tituloReg(prof, reg))}</h1>
     ${aviso(prof)}
@@ -183,7 +183,7 @@ export function paginaForm({ params, query }) {
 
   const voltar = editando ? `#/p/${prof.id}/r/${reg.id}` : (pai ? `#/p/${prof.id}/r/${pai.id}` : `#/p/${prof.id}`);
   const titulo = editando ? `Editar ${en.nome.toLowerCase()}` : novoRotulo(en);
-  app().innerHTML = `<section class="formulario" style="--cor:${prof.cor}; --destaque:${prof.cor}; --sobre-destaque:#fff">
+  app().innerHTML = `<section class="formulario prof" style="--cor:${prof.cor}">
     <nav class="migalhas" aria-label="Você está aqui"><a href="#/">🏠 Início</a> › <a href="#/p/${prof.id}">${esc(prof.nome)}</a>${pai ? ` › <a href="#/p/${prof.id}/r/${pai.id}">${esc(tituloReg(prof, pai))}</a>` : ''}</nav>
     <h1 tabindex="-1"><span aria-hidden="true">${en.emoji}</span> ${esc(titulo[0].toUpperCase() + titulo.slice(1))}</h1>
     ${aviso(prof)}
@@ -221,7 +221,7 @@ export function paginaDocumento({ params }) {
   registrarRecente(prof.id, reg.id, doc.id);
   const voltar = `#/p/${prof.id}/r/${reg.id}`;
 
-  app().innerHTML = `<section class="pagina-doc" style="--cor:${prof.cor}; --destaque:${prof.cor}; --sobre-destaque:#fff">
+  app().innerHTML = `<section class="pagina-doc prof" style="--cor:${prof.cor}">
     <div class="barra-doc nao-imprimir">
       <a class="btn" href="${voltar}">← Voltar</a>
       <label class="papel">Papel

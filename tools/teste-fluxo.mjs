@@ -75,6 +75,28 @@ async function rodar(nome, url) {
   await page.waitForSelector('h1');
   ok(await page.evaluate(() => window.__xss) === undefined, 'texto digitado é escapado (sem XSS)');
 
+  // Acessibilidade: teclado, títulos, aria-current
+  await page.goto(url + '#/');
+  await page.reload();
+  await page.waitForSelector('.grade-predios');
+  await page.keyboard.press('Tab');
+  ok(await page.evaluate(() => document.activeElement.classList.contains('pular')), 'primeiro Tab vai para "Pular para o conteúdo"');
+  ok(await page.evaluate(() => document.querySelector('header nav a[aria-current="page"]')?.textContent.includes('Início')), 'menu marca a página atual (aria-current)');
+  await page.goto(url + '#/p/dentista/novo/paciente');
+  await page.waitForSelector('[data-dente]');
+  ok((await page.title()).includes('paciente'), 'título da aba muda por página');
+  await page.focus('[data-dente] >> nth=4');
+  await page.keyboard.press('Enter');
+  ok(/Dente 5: brilhando/.test(await page.getAttribute('[data-dente] >> nth=4', 'aria-label')), 'dente muda com o teclado e o rótulo acompanha');
+  ok(/Dente 5/.test(await page.textContent('[data-odonto-aviso]')), 'mudança do dente é anunciada (região viva)');
+  await page.goto(url + '#/p/medica/novo/paciente');
+  await page.focus('#f-nome');
+  ok(await page.evaluate(() => document.querySelectorAll('input:required').length > 0 && !!document.querySelector('label[for="f-nome"]')), 'campos têm rótulo e obrigatórios são marcados');
+  await page.goto(url + '#/p/medica');
+  await page.click('text=Novo paciente');
+  await page.click('button[type=submit]');
+  ok(await page.evaluate(() => location.hash.includes('novo')), 'formulário vazio não salva (validação nativa)');
+
   // Exemplos de todas as profissões e todos os documentos
   const ids = ['veterinaria', 'dentista', 'advogada', 'juiza', 'professora', 'chef', 'detetive', 'jornalista', 'astronauta', 'cientista'];
   for (const id of ids) {

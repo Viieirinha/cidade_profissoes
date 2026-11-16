@@ -202,6 +202,7 @@ __defs["js/core/roteador.js"] = function (__m, __r) {
 
 const rotas = [];
 let naoEncontrada = null;
+let primeiraVez = true;
 
 function rota(padrao, tratador) {
   const nomes = [];
@@ -243,8 +244,20 @@ function executar() {
 
 function depois() {
   window.scrollTo(0, 0);
+  const eraPrimeira = primeiraVez;
+  primeiraVez = false;
   const h1 = document.querySelector('#app h1');
-  if (h1) { h1.setAttribute('tabindex', '-1'); h1.focus({ preventScroll: true }); }
+  if (h1) {
+    h1.setAttribute('tabindex', '-1');
+    // Na carga inicial não rouba o foco (o primeiro Tab deve ir ao link "Pular para o conteúdo").
+    if (!eraPrimeira) h1.focus({ preventScroll: true });
+    const base = (document.getElementById('nome-escritorio') || {}).textContent || '';
+    document.title = `${h1.textContent.replace(/\s+/g, ' ').trim()} · ${base}`;
+  }
+  const atual = location.hash.startsWith('#/config') ? '#/config' : (location.hash.replace(/^#/, '') || '/') === '/' ? '#/' : null;
+  document.querySelectorAll('header nav a').forEach((a) => {
+    if (a.getAttribute('href') === atual) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+  });
 }
 
 function iniciar(fnNaoEncontrada) {
@@ -825,7 +838,7 @@ function htmlOdontograma(estados, interativo) {
     <p class="odonto-rotulo">Em cima</p><div class="odonto-linha">${linha(0)}</div>
     <p class="odonto-rotulo">Embaixo</p><div class="odonto-linha">${linha(16)}</div>
     <ul class="odonto-legenda">${legenda}</ul>
-    ${interativo ? '<p class="ajuda">Toque num dente para mudar como ele está.</p>' : ''}
+    ${interativo ? '<p class="ajuda">Toque num dente para mudar como ele está.</p><p class="sr-only" role="status" data-odonto-aviso></p>' : ''}
   </div>`;
 }
 
@@ -876,7 +889,7 @@ function sugestoesTexto(c, id) {
 }
 
 function htmlCampo(c, valor, ctx = {}) {
-  if (c.tipo === 'secao') return `<h3 class="form-secao">${esc(c.rotulo)}</h3>`;
+  if (c.tipo === 'secao') return `<h2 class="form-secao">${esc(c.rotulo)}</h2>`;
   const id = 'f-' + c.nome;
   const v = valor === undefined ? valorPadrao(c) : valor;
   const req = c.obrigatorio ? ' required' : '';
@@ -1016,7 +1029,10 @@ function ligarFormulario(form) {
       b.dataset.estado = prox;
       const [em, nome] = ESTADOS_DENTE[prox];
       b.firstElementChild.textContent = em;
-      b.setAttribute('aria-label', `Dente ${b.querySelector('small').textContent}: ${nome}`);
+      const texto = `Dente ${b.querySelector('small').textContent}: ${nome}`;
+      b.setAttribute('aria-label', texto);
+      const aviso = form.querySelector('[data-odonto-aviso]');
+      if (aviso) aviso.textContent = texto;
     } else if (b.hasAttribute('data-add')) {
       adicionarChip(b.closest('.chip-novo'));
     } else if (b.dataset.sug !== undefined) {
@@ -2117,7 +2133,7 @@ function paginaEscritorio({ params }) {
   const regs = listar(prof.id, raiz.id).sort(maisRecentes);
   const recentes = atend ? listar(prof.id, atend.id).sort(maisRecentes).slice(0, 4) : [];
 
-  app().innerHTML = `<section class="escritorio" style="--cor:${prof.cor}; --destaque:${prof.cor}; --sobre-destaque:#fff">
+  app().innerHTML = `<section class="escritorio prof" style="--cor:${prof.cor}">
     <nav class="migalhas" aria-label="Você está aqui"><a href="#/">🏠 Início</a> › <span>${esc(prof.nome)}</span></nav>
     <h1 tabindex="-1"><span aria-hidden="true">${prof.emoji}</span> Escritório: ${esc(prof.nome)}</h1>
     <p class="subtitulo">${esc(prof.descricao || '')}</p>
@@ -2181,7 +2197,7 @@ function paginaDetalhe({ params }) {
   }).join('');
 
   const voltar = pai ? `#/p/${prof.id}/r/${pai.id}` : `#/p/${prof.id}`;
-  app().innerHTML = `<section class="detalhe" style="--cor:${prof.cor}; --destaque:${prof.cor}; --sobre-destaque:#fff">
+  app().innerHTML = `<section class="detalhe prof" style="--cor:${prof.cor}">
     <nav class="migalhas" aria-label="Você está aqui"><a href="#/">🏠 Início</a> › <a href="#/p/${prof.id}">${esc(prof.nome)}</a>${pai ? ` › <a href="${voltar}">${esc(tituloReg(prof, pai))}</a>` : ''} › <span>${esc(tituloReg(prof, reg))}</span></nav>
     <h1 tabindex="-1"><span aria-hidden="true">${esc(reg.dados.emoji || en.emoji)}</span> ${esc(tituloReg(prof, reg))}</h1>
     ${aviso(prof)}
@@ -2231,7 +2247,7 @@ function paginaForm({ params, query }) {
 
   const voltar = editando ? `#/p/${prof.id}/r/${reg.id}` : (pai ? `#/p/${prof.id}/r/${pai.id}` : `#/p/${prof.id}`);
   const titulo = editando ? `Editar ${en.nome.toLowerCase()}` : novoRotulo(en);
-  app().innerHTML = `<section class="formulario" style="--cor:${prof.cor}; --destaque:${prof.cor}; --sobre-destaque:#fff">
+  app().innerHTML = `<section class="formulario prof" style="--cor:${prof.cor}">
     <nav class="migalhas" aria-label="Você está aqui"><a href="#/">🏠 Início</a> › <a href="#/p/${prof.id}">${esc(prof.nome)}</a>${pai ? ` › <a href="#/p/${prof.id}/r/${pai.id}">${esc(tituloReg(prof, pai))}</a>` : ''}</nav>
     <h1 tabindex="-1"><span aria-hidden="true">${en.emoji}</span> ${esc(titulo[0].toUpperCase() + titulo.slice(1))}</h1>
     ${aviso(prof)}
@@ -2269,7 +2285,7 @@ function paginaDocumento({ params }) {
   registrarRecente(prof.id, reg.id, doc.id);
   const voltar = `#/p/${prof.id}/r/${reg.id}`;
 
-  app().innerHTML = `<section class="pagina-doc" style="--cor:${prof.cor}; --destaque:${prof.cor}; --sobre-destaque:#fff">
+  app().innerHTML = `<section class="pagina-doc prof" style="--cor:${prof.cor}">
     <div class="barra-doc nao-imprimir">
       <a class="btn" href="${voltar}">← Voltar</a>
       <label class="papel">Papel
