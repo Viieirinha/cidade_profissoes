@@ -56,6 +56,12 @@ export default {
         <p>${c.par(c.d.texto || '')}</p>${c.campo('Editoria', c.d.editoria)}`,
     },
   ],
+  sorteios: [
+    { pitch: 'Primeira página: o gato derrubou o vaso, o bairro inteiro quer saber! 🐱', tipo: 'edicao', dados: { nome: 'O Diário da Cidade', lema: 'Notícias fofas todo dia' }, filhos: [{ tipo: 'materia', dados: { titulo: 'Gato derruba vaso e jura inocência', linhaFina: 'Testemunhas viram apenas um rabinho balançando.', cena: '🐱🌷', editoria: 'Bichinhos', destaque: 'Matéria principal' } }] },
+    { pitch: 'Primeira página: o festival do brigadeiro bateu recorde! 🍫', tipo: 'edicao', dados: { nome: 'Gazeta Doce', lema: 'Doce de ler' }, filhos: [{ tipo: 'materia', dados: { titulo: 'Festival do brigadeiro bate recorde', linhaFina: 'Foram mais de mil colheres de alegria.', cena: '🍫🎉', editoria: 'Culinária', destaque: 'Matéria principal' } }] },
+    { pitch: 'Primeira página: o time da escola ganhou o campeonato de pega-pega! 🏃', tipo: 'edicao', dados: { nome: 'Jornal da Escola', lema: 'Tudo que acontece no recreio' }, filhos: [{ tipo: 'materia', dados: { titulo: 'Time do 5º ano vence o grande pega-pega', linhaFina: 'A torcida pulou de alegria.', cena: '🏃🏆', editoria: 'Esportes', destaque: 'Matéria principal' } }] },
+    { pitch: 'Primeira página: um foguete de papelão chegou à Lua do quintal! 🚀', tipo: 'edicao', dados: { nome: 'Folha Espacial', lema: 'Notícias de outro mundo' }, filhos: [{ tipo: 'materia', dados: { titulo: 'Foguete de papelão aterrissa no quintal', linhaFina: 'A tripulação voltou com sorrisos e muitas histórias.', cena: '🚀🌙', editoria: 'Ciência', destaque: 'Matéria principal' } }] },
+  ],
   exemplo: [{
     tipo: 'edicao', dados: { nome: 'O Diário da Cidade', lema: 'Notícias fofas todo dia' },
     filhos: [

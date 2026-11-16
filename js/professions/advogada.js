@@ -66,6 +66,13 @@ export default {
       },
     },
   ],
+  sorteios: [
+    { pitch: 'O sumiço do brigadeiro: Dona Brigadeira acusa o gato Mingau. 🍫', tipo: 'cliente', dados: { nome: 'Dona Brigadeira', tipo: 'Empresa de brigadeiro' }, filhos: [{ tipo: 'caso', dados: { titulo: 'O sumiço do brigadeiro', autor: 'Dona Brigadeira', reu: 'Gato Mingau', fatos: 'O brigadeiro sumiu da bancada e só restaram migalhas de chocolate.', provas: ['Migalhas de chocolate', 'Pegadas de patinha'] } }] },
+    { pitch: 'A bicicleta emprestada: Theo quer sua bicicleta de volta há uma semana. 🚲', tipo: 'cliente', dados: { nome: 'Theo', tipo: 'Amiga ou amigo' }, filhos: [{ tipo: 'caso', dados: { titulo: 'A bicicleta emprestada', autor: 'Theo', reu: 'Lia', fatos: 'A bicicleta foi emprestada para um passeio rápido e ainda não voltou.', provas: ['Bilhete misterioso'] } }] },
+    { pitch: 'O pega-pega: quem tocou primeiro no pique? Ninguém concorda! 🏃', tipo: 'cliente', dados: { nome: 'Bia', tipo: 'Amiga ou amigo' }, filhos: [{ tipo: 'caso', dados: { titulo: 'Quem tocou primeiro no pique', autor: 'Bia', reu: 'Dudu', fatos: 'Na brincadeira de pega-pega, os dois dizem que chegaram primeiro.' } }] },
+    { pitch: 'O bolo secreto: alguém contou a receita da vovó para a vizinhança inteira! 🎂', tipo: 'cliente', dados: { nome: 'Vovó Lu', tipo: 'Amiga ou amigo' }, filhos: [{ tipo: 'caso', dados: { titulo: 'A receita secreta do bolo', autor: 'Vovó Lu', reu: 'Papagaio Zeca', fatos: 'O papagaio repetiu a receita em voz alta na feira.', provas: ['Testemunha: o gato 🐱'] } }] },
+    { pitch: 'O ursinho Teddy quer um quarto só para ele, mas os brinquedos não querem sair. 🧸', tipo: 'cliente', dados: { nome: 'Ursinho Teddy', tipo: 'Ursinho de pelúcia' }, filhos: [{ tipo: 'caso', dados: { titulo: 'O quarto dos brinquedos', autor: 'Ursinho Teddy', reu: 'Os brinquedos do baú', fatos: 'Todos querem dormir na cama de cima.' } }] },
+  ],
   exemplo: [{
     tipo: 'cliente', dados: { nome: 'Dona Brigadeira', tipo: 'Empresa de brigadeiro' },
     filhos: [

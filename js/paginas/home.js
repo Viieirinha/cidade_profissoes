@@ -4,6 +4,7 @@ import { obter, listar } from '../core/entidades.js';
 import { tituloReg } from '../core/modelo.js';
 import { todosSelos, totalAtendimentos } from '../core/selos.js';
 import { esc, fmtRelativo } from '../core/ui.js';
+import { htmlFigurinha } from './album.js';
 
 export function paginaHome() {
   const { config, recentes } = getEstado();
@@ -35,7 +36,7 @@ export function paginaHome() {
 
   document.getElementById('app').innerHTML = `
     <section class="hero">
-      <h1 tabindex="-1">${nome ? `Olá, ${esc(nome)}! 👋` : 'Bem-vinda à cidade! 👋'}</h1>
+      <h1 tabindex="-1"><span aria-hidden="true">${esc(config.marca.avatar)}</span> ${nome ? `Olá, ${esc(nome)}! 👋` : 'Bem-vinda à cidade! 👋'}</h1>
       <p>${esc(config.escritorio)} — escolha um prédio para começar a trabalhar.</p>
       <p class="acoes">${nome ? '' : '<a class="btn btn-primario" href="#/config">✏️ Dizer meu nome</a>'}<a class="btn" href="#/relatorio">📊 Relatório da cidade</a></p>
       <ul class="estatisticas" aria-label="Seu progresso">
@@ -52,8 +53,9 @@ export function paginaHome() {
       ${docs ? `<ul class="lista-itens">${docs}</ul>` : '<p class="vazio-texto">Ainda não há documentos. Atenda alguém e abra uma receita, boletim ou relatório! 📄</p>'}
     </section>
     <section aria-labelledby="t-selos">
-      <h2 id="t-selos">Meus selos</h2>
-      ${ganhos.length ? `<ul class="selos">${ganhos.map((s) => `<li class="selo"><span aria-hidden="true">${s.emoji}</span> ${esc(s.titulo)}</li>`).join('')}</ul>`
-        : '<p class="vazio-texto">Os selos aparecem aqui quando você atende e cria coisas. Sem pressa! 🌈</p>'}
+      <h2 id="t-selos">Meu álbum de selos</h2>
+      ${ganhos.length ? `<ul class="figurinhas">${[...ganhos].sort((a, b) => (getEstado().selos[b.id] || '').localeCompare(getEstado().selos[a.id] || '')).slice(0, 6).map((s) => htmlFigurinha(s, (porId(s.grupo) || { cor: '#c2185b' }).cor)).join('')}</ul>`
+        : '<p class="vazio-texto">As figurinhas aparecem aqui quando você atende e cria coisas. Sem pressa! 🌈</p>'}
+      <p><a class="btn" href="#/album">🌟 Abrir meu álbum completo</a></p>
     </section>`;
 }

@@ -6,8 +6,9 @@ import { entidadeDe, tituloReg, subtituloReg, nomeDe, criarCtx } from '../core/m
 import { htmlFormulario, lerFormulario, ligarFormulario, formatarValor, htmlOdontograma, valorPadrao } from '../core/formulario.js';
 import { htmlFolha, imprimir } from '../core/imprimir.js';
 import { verificarSelos, incentivo } from '../core/selos.js';
+import { semear, sortear } from '../core/sorteio.js';
 import { navegar } from '../core/roteador.js';
-import { esc, toast, confirmar, fmtRelativo } from '../core/ui.js';
+import { esc, toast, confirmar, perguntaHtml } from '../core/ui.js';
 
 const app = () => document.getElementById('app');
 const novoRotulo = (en) => `${en.f ? 'Nova' : 'Novo'} ${en.nome.toLowerCase()}`;
@@ -43,23 +44,6 @@ function botoesDoc(prof, reg, pequeno = true) {
     .map((d) => `<a class="btn ${pequeno ? 'btn-pequeno' : ''} btn-doc" href="#/p/${prof.id}/d/${reg.id}/${d.id}">${esc(d.botao || '🖨️ ' + d.titulo)}</a>`).join('');
 }
 
-function criarExemplo(prof) {
-  const semear = (item, pai) => {
-    const en = entidadeDe(prof, item.tipo);
-    const dados = { ...item.dados };
-    en.campos.forEach((c) => {
-      if (c.tipo !== 'secao' && (dados[c.nome] === undefined || dados[c.nome] === '')) {
-        const p = valorPadrao(c);
-        if (p !== '') dados[c.nome] = p;
-      }
-    });
-    const reg = criar(prof.id, item.tipo, dados, pai);
-    (item.filhos || []).forEach((f) => semear(f, reg.id));
-    return reg;
-  };
-  prof.exemplo.forEach((i) => semear(i));
-}
-
 // ---------- Escritório ----------
 export function paginaEscritorio({ params }) {
   const prof = porId(params.prof);
@@ -76,6 +60,7 @@ export function paginaEscritorio({ params }) {
     ${aviso(prof)}
     <div class="acoes">
       <a class="btn btn-primario" href="#/p/${prof.id}/novo/${raiz.id}">＋ ${esc(novoRotulo(raiz))}</a>
+      ${(prof.sorteios || []).length ? '<button class="btn" id="sortear" type="button">🎲 Sortear um caso</button>' : ''}
       ${regs.length === 0 && prof.exemplo ? '<button class="btn" id="exemplo" type="button">✨ Criar um exemplo</button>' : ''}
     </div>
     <h2>${esc(raiz.plural)} (${regs.length})</h2>
@@ -87,7 +72,28 @@ export function paginaEscritorio({ params }) {
   </section>`;
 
   const ex = document.getElementById('exemplo');
-  if (ex) ex.addEventListener('click', () => { criarExemplo(prof); verificarSelos(); toast('Exemplo criado! ' + incentivo()); paginaEscritorio({ params }); });
+  if (ex) ex.addEventListener('click', () => { prof.exemplo.forEach((m) => semear(prof, m)); verificarSelos(); toast('Exemplo criado! ' + incentivo()); paginaEscritorio({ params }); });
+
+  const sorteio = document.getElementById('sortear');
+  if (sorteio) {
+    sorteio.addEventListener('click', async () => {
+      for (;;) {
+        const caso = sortear(prof);
+        const resp = await perguntaHtml('🎲 Chegou um caso novo!', `<p class="sorteio-pitch">${esc(caso.pitch)}</p><p class="ajuda">Você pode atender agora ou sortear outro.</p>`, [
+          { valor: 'outro', rotulo: '🎲 Outro caso' },
+          { valor: 'atender', rotulo: '✅ Atender!', primario: true },
+        ]);
+        if (resp === 'atender') {
+          const reg = semear(prof, caso);
+          verificarSelos();
+          toast('Caso aceito! ' + incentivo());
+          navegar(`/p/${prof.id}/r/${reg.id}`);
+          return;
+        }
+        if (resp !== 'outro') return;
+      }
+    });
+  }
 
   const busca = document.getElementById('busca');
   if (busca) {

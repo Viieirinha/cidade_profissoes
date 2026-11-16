@@ -2,6 +2,9 @@ import { txt, area, num, data, sel, chips, odontograma } from '../core/campos.js
 import { htmlOdontograma } from '../core/formulario.js';
 import { fmtData } from '../core/ui.js';
 
+// Monta os 32 dentes: D({ 3: 'e' }) deixa o dente 3 "precisando de escovinha" e o resto saudável.
+const D = (m) => Array.from({ length: 32 }, (_, i) => m[i + 1] || 's');
+
 export default {
   id: 'dentista',
   nome: 'Dentista',
@@ -60,6 +63,13 @@ export default {
         <section class="doc-bloco"><h4>Odontograma</h4>${htmlOdontograma(c.d.dentes, false)}</section>
         ${c.bloco('Anotações', c.d.obs)}`,
     },
+  ],
+  sorteios: [
+    { pitch: 'A boneca Rosinha precisa de uma visita de rotina para o sorriso ficar brilhando. ✨', tipo: 'paciente', dados: { nome: 'Boneca Rosinha', idade: 7, tipo: 'Boneca', dentes: D({ 4: 'b', 5: 'b', 20: 'e' }) }, filhos: [{ tipo: 'consulta', dados: { motivo: ['Visita de rotina'] } }] },
+    { pitch: 'O ursinho Teddy está com um dentinho mole e quer falar com a Fada do Dente. 🧚', tipo: 'paciente', dados: { nome: 'Ursinho Teddy', idade: 5, tipo: 'Ursinho de pelúcia', dentes: D({ 9: 'f', 24: 'f' }) }, filhos: [{ tipo: 'consulta', dados: { motivo: ['Dentinho mole (fada do dente!)'] } }] },
+    { pitch: 'O dragão Chama vai tirar uma foto e quer um sorriso de cinema. 📸', tipo: 'paciente', dados: { nome: 'Dragão Chama', idade: 300, tipo: 'Dragão de faz de conta', dentes: D({ 1: 'e', 2: 'e', 16: 'e' }) }, filhos: [{ tipo: 'consulta', dados: { motivo: ['Sorriso para a foto'] } }] },
+    { pitch: 'O vovô Beto ganhou uma escova nova colorida e quer testar. 🪥', tipo: 'paciente', dados: { nome: 'Vovô Beto', idade: 68, tipo: 'Amiga ou amigo', dentes: D({ 12: 'o', 13: 'b' }) }, filhos: [{ tipo: 'consulta', dados: { motivo: ['Escova nova'] } }] },
+    { pitch: 'O leão Leo diz que seus dentes estão brilhando mais que o sol. ☀️', tipo: 'paciente', dados: { nome: 'Leão Leo', idade: 10, tipo: 'Bichinho de pelúcia', dentes: D({ 7: 'b', 8: 'b', 25: 'b', 26: 'b' }) }, filhos: [{ tipo: 'consulta', dados: { motivo: ['Dentinho brilhando'] } }] },
   ],
   exemplo: [{
     tipo: 'paciente',

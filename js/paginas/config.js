@@ -1,11 +1,41 @@
 import { getEstado, salvar, substituirEstado, apagarTudo, CORES } from '../core/storage.js';
 import { exportarBackup, lerBackup } from '../core/backup.js';
 import { todosSelos } from '../core/selos.js';
+import { PALETA, FORMAS_LOGO, FORMAS_CARIMBO, TIMBRES, AVATARES, EMOJIS_MARCA, normalizarMarca } from '../core/marca.js';
+import { logoSVG, carimboSVG } from '../core/imprimir.js';
+import { PROFISSOES } from '../professions/index.js';
 import { aplicarAparencia } from '../core/aparencia.js';
 import { esc, toast, confirmar } from '../core/ui.js';
 import { navegar } from '../core/roteador.js';
 
 const NOMES_COR = { rosa: '🌸 Rosa', lilas: '💜 Lilás', azul: '💙 Azul', verde: '💚 Verde', laranja: '🧡 Laranja' };
+
+const radio = (nome, valor, atual, conteudo, extra = '') =>
+  `<label class="chip${extra}"><input type="radio" name="${nome}" value="${esc(valor)}"${valor === atual ? ' checked' : ''}><span>${conteudo}</span></label>`;
+const radiosCor = (nome, atual, rotuloVazio) =>
+  radio(nome, '', atual, esc(rotuloVazio)) +
+  PALETA.map((p) => radio(nome, p.cor, atual, `<i class="amostra" style="background:${p.cor}"></i>${esc(p.nome)}`)).join('');
+const radiosEmoji = (nome, lista, atual, vazio) =>
+  (vazio ? radio(nome, '', atual, esc(vazio)) : '') + lista.map((e) => radio(nome, e, atual, esc(e), ' chip-emoji')).join('');
+
+function lerMarca(form) {
+  const v = (n) => { const el = form.querySelector(`input[name="${n}"]:checked`); return el ? el.value : ''; };
+  return normalizarMarca({
+    avatar: v('avatar'), logoEmoji: v('logoEmoji'), logoForma: v('logoForma'), corDocs: v('corDocs'),
+    carimboForma: v('carimboForma'), carimboCor: v('carimboCor'), carimboEmoji: v('carimboEmoji'),
+    carimboFrase: form.querySelector('#c-frase').value, timbre: v('timbre'),
+  });
+}
+
+function desenharPrevia(form) {
+  const marca = lerMarca(form);
+  const prof = PROFISSOES[0];
+  const nome = form.querySelector('#c-jog').value.trim() || 'Profissional Exemplo';
+  const cor = marca.corDocs || prof.cor;
+  document.getElementById('previa').innerHTML = `<div class="folha timbre-${marca.timbre}" style="--cor:${cor}">
+    <div class="folha-cab">${logoSVG(prof, 52, marca)}<div class="folha-ident"><h3 class="folha-nome">${esc(prof.local)} ${esc(nome)}</h3><p>${esc(prof.cargo)} ${esc(nome)}</p></div></div>
+    <div class="folha-assina"><p style="margin:0"><small>Assim ficam seus documentos</small></p>${carimboSVG(prof, marca)}</div></div>`;
+}
 
 export function paginaConfig() {
   const { config } = getEstado();
@@ -28,6 +58,20 @@ export function paginaConfig() {
           </div></fieldset>
         <fieldset class="campo"><legend>Cor de destaque</legend>
           <div class="chips">${CORES.map((c) => `<label class="chip"><input type="radio" name="cor" value="${c}"${config.cor === c ? ' checked' : ''}><span>${NOMES_COR[c]}</span></label>`).join('')}</div></fieldset>
+
+        <h2>Meu escritório</h2>
+        <p class="ajuda">Escolha como seu escritório aparece nos documentos. O carimbo sempre diz "de brincadeira".</p>
+        <div id="previa" class="previa" aria-live="polite"></div>
+        <fieldset class="campo"><legend>Meu avatar</legend><div class="chips">${radiosEmoji('avatar', AVATARES, config.marca.avatar)}</div></fieldset>
+        <fieldset class="campo"><legend>Cor dos documentos</legend><div class="chips">${radiosCor('corDocs', config.marca.corDocs, 'Cada profissão tem a sua')}</div></fieldset>
+        <fieldset class="campo"><legend>Logotipo: formato</legend><div class="chips">${FORMAS_LOGO.map(([k, n]) => radio('logoForma', k, config.marca.logoForma, n)).join('')}</div></fieldset>
+        <fieldset class="campo"><legend>Logotipo: emoji</legend><div class="chips">${radiosEmoji('logoEmoji', EMOJIS_MARCA, config.marca.logoEmoji, 'Da profissão')}</div></fieldset>
+        <fieldset class="campo"><legend>Papel timbrado</legend><div class="chips">${TIMBRES.map(([k, n]) => radio('timbre', k, config.marca.timbre, n)).join('')}</div></fieldset>
+        <fieldset class="campo"><legend>Carimbo: formato</legend><div class="chips">${FORMAS_CARIMBO.map(([k, n]) => radio('carimboForma', k, config.marca.carimboForma, n)).join('')}</div></fieldset>
+        <fieldset class="campo"><legend>Carimbo: cor</legend><div class="chips">${radiosCor('carimboCor', config.marca.carimboCor, 'Igual aos documentos')}</div></fieldset>
+        <fieldset class="campo"><legend>Carimbo: emoji</legend><div class="chips">${radiosEmoji('carimboEmoji', EMOJIS_MARCA, config.marca.carimboEmoji, 'Da profissão')}</div></fieldset>
+        <div class="campo"><label for="c-frase">Carimbo: frase (aparece acima de "DE BRINCADEIRA")</label>
+          <input id="c-frase" type="text" maxlength="18" value="${esc(config.marca.carimboFrase)}" placeholder="Ex.: APROVADO"></div>
         <button class="btn btn-primario" type="submit">💾 Salvar</button>
       </form>
 
@@ -43,8 +87,9 @@ export function paginaConfig() {
       </section>
 
       <section class="cartao-bloco" aria-labelledby="t-selos">
-        <h2 id="t-selos">Selos (${selos.filter((s) => s.ok).length} de ${selos.length})</h2>
-        <ul class="selos">${selos.map((s) => `<li class="selo${s.ok ? '' : ' selo-bloqueado'}"><span aria-hidden="true">${s.ok ? s.emoji : '🔒'}</span> ${esc(s.titulo)}${s.ok ? '' : ' <span class="sr-only">(ainda não ganhou)</span>'}</li>`).join('')}</ul>
+        <h2 id="t-selos">Selos</h2>
+        <p>Você tem <strong>${selos.filter((s) => s.ok).length}</strong> de ${selos.length} figurinhas no álbum.</p>
+        <p><a class="btn" href="#/album">🌟 Abrir meu álbum de selos</a></p>
       </section>
 
       <section class="cartao-bloco" aria-labelledby="t-priv">
@@ -63,12 +108,16 @@ export function paginaConfig() {
     c.escritorio = f.querySelector('#c-esc').value.trim() || 'Cidade das Profissões';
     c.tema = f.querySelector('input[name="tema"]:checked').value;
     c.cor = f.querySelector('input[name="cor"]:checked').value;
+    c.marca = lerMarca(f);
     salvar();
     aplicarAparencia();
     toast('Configurações salvas! ✨');
   });
   // Mostra a mudança de cor/tema na hora, antes de salvar
+  desenharPrevia(document.getElementById('form-config'));
+  document.getElementById('form-config').addEventListener('input', (ev) => desenharPrevia(ev.currentTarget));
   document.getElementById('form-config').addEventListener('change', (ev) => {
+    desenharPrevia(ev.currentTarget);
     if (ev.target.name === 'tema') document.documentElement.dataset.tema = ev.target.value;
     if (ev.target.name === 'cor') document.documentElement.dataset.cor = ev.target.value;
   });

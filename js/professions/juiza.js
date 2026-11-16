@@ -48,6 +48,13 @@ export default {
         <p style="margin-top:1rem"><em>Assim decido. Publique-se, registre-se e brinque-se!</em></p>`,
     },
   ],
+  sorteios: [
+    { pitch: 'O gato e o vaso: o gato jura que foi o vento. 🐱', tipo: 'caso', dados: { titulo: 'O gato e o vaso', autor: 'Vovó Lu', reu: 'Gato Mingau', resumo: 'O vaso de flores apareceu no chão. O gato diz que foi o vento.', status: 'Na pauta' } },
+    { pitch: 'Quem comeu o último pedaço de bolo? Duas pessoas dizem que não foram. 🍰', tipo: 'caso', dados: { titulo: 'O último pedaço de bolo', autor: 'Bia', reu: 'Theo', resumo: 'O prato ficou vazio e só sobrou um guardanapo com chocolate.', status: 'Na pauta' } },
+    { pitch: 'O castelo de almofadas desabou na hora do filme. 🏰', tipo: 'caso', dados: { titulo: 'O castelo de almofadas', autor: 'Lia', reu: 'Dudu', resumo: 'O castelo caiu quando alguém passou correndo.', status: 'Na pauta' } },
+    { pitch: 'A fila do escorregador: alguém furou a fila? 🛝', tipo: 'caso', dados: { titulo: 'A fila do escorregador', autor: 'Bia', reu: 'Pipoca, o coelho', resumo: 'O coelho pulou na frente de todo mundo.', status: 'Na pauta' } },
+    { pitch: 'O desenho de giz na calçada foi pisado pelo cachorro. 🎨', tipo: 'caso', dados: { titulo: 'O desenho de giz', autor: 'Lia', reu: 'Cachorro Bolota', resumo: 'O desenho ficou com pegadas, mas o cachorro nega tudo.', status: 'Na pauta' } },
+  ],
   exemplo: [{
     tipo: 'caso', dados: { titulo: 'O gato e o vaso', autor: 'Vovó Lu', reu: 'Gato Mingau', resumo: 'O vaso de flores apareceu no chão. O gato jura que foi o vento.', status: 'Na pauta' },
     filhos: [{ tipo: 'julgamento', dados: { relatorio: 'O vaso caiu e o gato estava por perto.', fundamentos: 'Considerando que todos prometeram se desculpar.', decisao: 'O gato deverá pedir desculpas com um ronronar.' } }],

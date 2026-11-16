@@ -79,6 +79,14 @@ export default {
         ${c.campo('Retorno', c.d.retorno ? c.data(c.d.retorno) : '')}`,
     },
   ],
+  sorteios: [
+    { pitch: 'Ursinho Teddy perdeu um botão do olho e está muito chateado. 🧸', tipo: 'paciente', dados: { nome: 'Ursinho Teddy', idade: 5, tipo: 'Ursinho de pelúcia', obs: 'Adora abraços.' }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Saudade do brinquedo favorito'], sintomasLivre: 'Perdeu um botão do olho.', temperatura: 36.5, batimentos: 90, peso: 1.2 } }] },
+    { pitch: 'A boneca Margarida está com soluço de dragão desde o café da manhã. 🐉', tipo: 'paciente', dados: { nome: 'Boneca Margarida', idade: 8, tipo: 'Boneca' }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Soluço de dragão', 'Cócegas nas orelhas'], temperatura: 36.7, batimentos: 95 } }] },
+    { pitch: 'O dinossauro Beto comeu 10 brigadeiros imaginários e a barriguinha está roncando. 🦕', tipo: 'paciente', dados: { nome: 'Dino Beto', idade: 6, tipo: 'Bichinho de pelúcia' }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Barriguinha roncando', 'Sono demais'], peso: 3.4 } }] },
+    { pitch: 'Vovó Lu dançou o dia inteiro e está com os pés dormentes de tanto balançar. 💃', tipo: 'paciente', dados: { nome: 'Vovó Lu', idade: 70, tipo: 'Amiga ou amigo' }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Pé dormente de tanto dançar', 'Cansaço'], temperatura: 36.4 } }] },
+    { pitch: 'O coelho Pipoca está com o nariz escorrendo e muitos espirros de glitter. 🐰', tipo: 'paciente', dados: { nome: 'Coelho Pipoca', idade: 3, tipo: 'Bichinho de pelúcia' }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Nariz escorrendo', 'Espirros'], temperatura: 36.8 } }] },
+    { pitch: 'A Capitã Estrela voltou da Lua com muito sono e saudade da Terra. 🌙', tipo: 'paciente', dados: { nome: 'Capitã Estrela', idade: 9, tipo: 'Boneca' }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Sono demais', 'Saudade do brinquedo favorito'], batimentos: 80 } }] },
+  ],
   exemplo: [
     {
       tipo: 'paciente',

@@ -140,6 +140,52 @@ async function rodar(nome, url) {
   await page.waitForSelector('.detalhe');
   ok(await page.locator('.quadro .post-it').count() > 0, 'quadro de pistas mostra post-its');
 
+  // Casos sorteados em todas as profissões
+  for (const id of ['medica','veterinaria','dentista','advogada','juiza','professora','chef','detetive','jornalista','astronauta','cientista']) {
+    await page.goto(`${url}#/p/${id}`);
+    await page.waitForSelector('#sortear');
+    await page.click('#sortear');
+    await page.waitForSelector('dialog[open] .sorteio-pitch');
+    await page.click('dialog button[value=outro]');
+    await page.waitForSelector('dialog[open] .sorteio-pitch');
+    await page.click('dialog button[value=atender]');
+    await page.waitForSelector('.detalhe');
+    if (!(await page.locator('.detalhe h1').innerText()).trim()) ok(false, `${id}: caso sorteado sem título`);
+  }
+  ok(true, 'sortear caso funciona nas 11 profissões (sortear outro e atender)');
+
+  // Álbum de figurinhas
+  await page.goto(`${url}#/album`);
+  await page.waitForSelector('.figurinhas');
+  ok(await page.locator('.figurinha.ganha').count() >= 10 && await page.locator('.figurinha.bloqueada').count() > 0, 'álbum mostra figurinhas ganhas e por ganhar');
+
+  // Personalização: carimbo, logotipo e papel timbrado
+  await page.goto(`${url}#/config`);
+  await page.fill('#c-jog', 'Lia');
+  await page.fill('#c-frase', 'APROVADO');
+  await page.click('label.chip:has-text("Oval")');
+  await page.click('label.chip:has-text("Listras")');
+  await page.click('label.chip:has(input[name="corDocs"][value="#7b1fa2"])');
+  ok(await page.locator('#previa .folha.timbre-listras').count() === 1, 'prévia do escritório muda na hora');
+  await page.click('#form-config button[type=submit]');
+  await page.goto(`${url}#/p/medica`);
+  await page.click('#lista li a');
+  await page.click('a.btn-doc >> nth=0');
+  await page.waitForSelector('.folha');
+  const svg = await page.locator('.folha .carimbo').innerHTML();
+  ok(svg.includes('APROVADO') && svg.includes('DE BRINCADEIRA') && svg.includes('ellipse'), 'carimbo personalizado e sempre com "DE BRINCADEIRA"');
+  ok(await page.locator('.folha.timbre-listras').count() === 1, 'papel timbrado aplicado no documento');
+  ok((await page.getAttribute('.folha', 'style')).includes('#7b1fa2'), 'cor dos documentos aplicada');
+  // Entradas maliciosas na marca são descartadas
+  await page.evaluate(() => {
+    const e = JSON.parse(localStorage.getItem('cidade-das-profissoes'));
+    e.config.marca = { corDocs: 'red;"><img src=x onerror=window.__xss2=1>', carimboFrase: '<b>oi</b>', timbre: 'hack', carimboForma: 'x' };
+    localStorage.setItem('cidade-das-profissoes', JSON.stringify(e));
+  });
+  await page.reload();
+  await page.waitForSelector('.folha');
+  ok(await page.evaluate(() => window.__xss2) === undefined && (await page.getAttribute('.folha', 'style')).includes('#'), 'marca inválida é saneada (sem injeção)');
+
   // Backup: exportar -> apagar -> importar
   await page.goto(`${url}#/config`);
   const [dl] = await Promise.all([page.waitForEvent('download'), page.click('#exportar')]);

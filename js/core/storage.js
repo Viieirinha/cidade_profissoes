@@ -1,6 +1,8 @@
 // Armazenamento local com versão de esquema e migrações.
 // Tudo fica em UMA chave do localStorage (um objeto JSON).
 
+import { marcaPadrao, normalizarMarca } from './marca.js';
+
 const CHAVE = 'cidade-das-profissoes';
 export const VERSAO = 1;
 export const TEMAS = ['claro', 'escuro'];
@@ -13,7 +15,7 @@ const ouvintesErro = [];
 export function estadoInicial() {
   return {
     schema: VERSAO,
-    config: { jogadora: '', escritorio: 'Cidade das Profissões', tema: 'claro', cor: 'rosa', avisoVisto: false },
+    config: { jogadora: '', escritorio: 'Cidade das Profissões', tema: 'claro', cor: 'rosa', avisoVisto: false, marca: marcaPadrao() },
     selos: {},
     contadores: { documentos: {} },
     registros: [],
@@ -41,6 +43,7 @@ function completar(e) {
       tema: TEMAS.includes(c.tema) ? c.tema : base.config.tema,
       cor: CORES.includes(c.cor) ? c.cor : base.config.cor,
       avisoVisto: c.avisoVisto === true,
+      marca: normalizarMarca(c.marca),
     },
     selos: e && e.selos && typeof e.selos === 'object' ? e.selos : {},
     contadores: {

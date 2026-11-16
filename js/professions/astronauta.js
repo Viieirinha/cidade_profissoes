@@ -54,6 +54,12 @@ export default {
       },
     },
   ],
+  sorteios: [
+    { pitch: 'Missão Estrela Cintilante: descobrir de onde vêm as estrelas cadentes. ⭐', tipo: 'missao', dados: { nome: 'Missão Estrela Cintilante', destino: 'Estrela Cintilante', nave: 'Foguete Arco-íris', objetivo: 'Descobrir de onde vêm as estrelas cadentes.' }, filhos: [{ tipo: 'tripulante', dados: { nome: 'Capitã Lia', emoji: '👩‍🚀', funcao: 'Comandante' } }, { tipo: 'tripulante', dados: { nome: 'Gato Astro', emoji: '🐱', funcao: 'Mascote' } }] },
+    { pitch: 'Missão Planeta de Brigadeiro: provar uma colher de espaço! 🍫', tipo: 'missao', dados: { nome: 'Missão Planeta de Brigadeiro', destino: 'Planeta de Brigadeiro', nave: 'Foguete Colher', objetivo: 'Descobrir se o planeta é mesmo doce.' }, filhos: [{ tipo: 'tripulante', dados: { nome: 'Chef Teo', emoji: '🧑‍🚀', funcao: 'Cozinheira espacial' } }, { tipo: 'tripulante', dados: { nome: 'Robô Beep', emoji: '🤖', funcao: 'Engenheira' } }] },
+    { pitch: 'Missão Lua: plantar uma bandeira de sorrisos. 🌙', tipo: 'missao', dados: { nome: 'Missão Lua', destino: 'Lua', nave: 'Nave Lunar', objetivo: 'Plantar uma bandeira de sorrisos na Lua.' }, filhos: [{ tipo: 'tripulante', dados: { nome: 'Piloto Dudu', emoji: '👨‍🚀', funcao: 'Piloto' } }, { tipo: 'tripulante', dados: { nome: 'Dra. Mia', emoji: '👩‍🚀', funcao: 'Cientista' } }] },
+    { pitch: 'Missão Saturno: contar quantos anéis o planeta tem. 🪐', tipo: 'missao', dados: { nome: 'Missão Saturno', destino: 'Saturno', nave: 'Foguete Anelzinho', objetivo: 'Contar os anéis e fazer um desenho.' }, filhos: [{ tipo: 'tripulante', dados: { nome: 'Capitão Raio', emoji: '🧑‍🚀', funcao: 'Comandante' } }, { tipo: 'tripulante', dados: { nome: 'Alien Gui', emoji: '👽', funcao: 'Mascote' } }] },
+  ],
   exemplo: [{
     tipo: 'missao', dados: { nome: 'Missão Estrela Cintilante', destino: 'Estrela Cintilante', nave: 'Foguete Arco-íris', objetivo: 'Descobrir de onde vêm as estrelas cadentes.' },
     filhos: [

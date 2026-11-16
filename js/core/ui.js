@@ -79,6 +79,22 @@ export function confirmar(mensagem, { sim = 'Sim', nao = 'Cancelar', perigo = fa
   });
 }
 
+// Pergunta com conteúdo em HTML (já escapado por quem chama) e botões com valores próprios.
+// Devolve o value do botão clicado, ou '' se a pessoa fechar (Esc).
+export function perguntaHtml(titulo, htmlCorpo, botoes) {
+  return new Promise((resolve) => {
+    const dlg = criarDialogo(`
+      <form method="dialog">
+        <h2 class="dialogo-titulo">${esc(titulo)}</h2>
+        <div class="dialogo-texto">${htmlCorpo}</div>
+        <div class="dialogo-acoes">${botoes.map((b, i) =>
+          `<button class="btn ${b.primario ? 'btn-primario' : ''}" value="${esc(b.valor)}"${i === botoes.length - 1 ? ' autofocus' : ''}>${esc(b.rotulo)}</button>`).join('')}</div>
+      </form>`);
+    dlg.addEventListener('close', () => resolve(dlg.returnValue || ''));
+    dlg.showModal();
+  });
+}
+
 export function avisoModal(titulo, htmlCorpo, botao = 'Entendi!') {
   return new Promise((resolve) => {
     const dlg = criarDialogo(`

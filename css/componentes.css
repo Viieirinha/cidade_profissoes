@@ -210,3 +210,35 @@ button.dente:hover { border-color: var(--destaque); }
 /* A folha é sempre branca (como o papel), mesmo no modo escuro */
 .folha .odonto-legenda, .folha .dente small, .folha .odonto-rotulo { color: #4a4057; }
 .folha .dente { background: #fff; color: #1d1a22; border-color: #c9c1d3; }
+
+/* Papel timbrado (faixa do cabeçalho) */
+.folha-cab { border-radius: 10px 10px 0 0; }
+.timbre-bolinhas .folha-cab { background: radial-gradient(color-mix(in srgb, var(--cor) 30%, transparent) 2.2px, transparent 2.8px) 0 0 / 14px 14px; padding: .6rem; }
+.timbre-listras .folha-cab { background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--cor) 14%, #fff) 0 10px, #fff 10px 20px); padding: .6rem; }
+.timbre-estrelas .folha-cab { background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Ctext x='14' y='20' font-size='16' text-anchor='middle' opacity='.18'%3E%E2%AD%90%3C/text%3E%3C/svg%3E") 0 0 / 28px 28px; padding: .6rem; }
+
+/* Configurações: amostras de cor e prévia do escritório */
+.chip .amostra { display: inline-block; width: 1.1rem; height: 1.1rem; border-radius: 50%; margin-right: .4rem; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--borda); }
+.previa .folha { max-width: 420px; margin: 0; padding: .6rem; border-top-width: 6px; }
+.previa .folha-assina { margin-top: .6rem; }
+.previa .carimbo { width: 72px; height: 72px; }
+
+/* Álbum de figurinhas */
+.figurinhas { list-style: none; padding: 0; margin: 0 0 1rem; display: grid; gap: .8rem; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.figurinha { display: flex; flex-direction: column; align-items: center; text-align: center; gap: .2rem; padding: .8rem .5rem; border-radius: 16px; min-height: 140px; justify-content: center; }
+.figurinha.ganha { background: var(--superficie); border: 3px solid var(--cor); box-shadow: 0 4px 0 var(--cor), var(--sombra); transform: rotate(-1.5deg); }
+.figurinha.ganha:nth-child(even) { transform: rotate(1.5deg); }
+.figurinha.bloqueada { border: 2px dashed var(--borda); color: var(--texto-suave); background: transparent; }
+.fig-emoji { font-size: 2.6rem; line-height: 1.1; }
+.bloqueada .fig-emoji { filter: grayscale(1); opacity: .7; }
+.fig-titulo { font-weight: 700; font-size: .95rem; }
+.figurinha small { color: var(--texto-suave); }
+.album h2 small { font-weight: 400; color: var(--texto-suave); font-size: .9rem; }
+
+/* Confete */
+.confete { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 60; }
+.confete span { position: absolute; top: -24px; width: 10px; height: 14px; border-radius: 2px; font-size: 1.4rem; line-height: 1; width: auto; height: auto; animation: cair 2.4s ease-in forwards; }
+.confete span:empty { width: 10px; height: 14px; }
+@keyframes cair { to { transform: translateY(105vh) rotate(var(--giro, 360deg)); opacity: .9; } }
+
+.sorteio-pitch { font-size: 1.15rem; font-weight: 700; margin: .4rem 0; }

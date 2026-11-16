@@ -85,6 +85,12 @@ export default {
       },
     },
   ],
+  sorteios: [
+    { pitch: 'Abriu o Cantinho do Brigadeiro: doces de colher para todo mundo! 🍫', tipo: 'cardapio', dados: { nome: 'Cantinho do Brigadeiro', tema: 'Doces de mentirinha' }, filhos: [{ tipo: 'prato', dados: { nome: 'Brigadeiro de colher', emoji: '🍫', categoria: 'Sobremesa', preco: 6, ingredientes: 'Chocolate\nCarinho\nUma pitada de risada', modo: 'Misture tudo com capricho e sirva com um sorriso.' } }, { tipo: 'prato', dados: { nome: 'Suco de morango', emoji: '🍓', categoria: 'Bebida', preco: 4, ingredientes: 'Morangos\nGelo', modo: 'Bata tudo e sirva gelado.' } }] },
+    { pitch: 'Abriu a Pizzaria da Lua: pizzas redondas como a lua cheia! 🌕', tipo: 'cardapio', dados: { nome: 'Pizzaria da Lua', tema: 'Pizzas espaciais' }, filhos: [{ tipo: 'prato', dados: { nome: 'Pizza Lua Cheia', emoji: '🍕', categoria: 'Prato principal', preco: 18, ingredientes: 'Massa\nQueijo\nTomate', modo: 'Abra a massa, cubra com queijo e tomate e asse com um adulto.' } }, { tipo: 'prato', dados: { nome: 'Suco de estrela', emoji: '🧃', categoria: 'Bebida', preco: 5, ingredientes: 'Maracujá\nBrilho de mentirinha', modo: 'Misture e sirva.' } }] },
+    { pitch: 'Abriu a Sorveteria Polar: sorvetes para o dia mais quente! 🍦', tipo: 'cardapio', dados: { nome: 'Sorveteria Polar', tema: 'Sorvetes de pinguim' }, filhos: [{ tipo: 'prato', dados: { nome: 'Sorvete de morango', emoji: '🍦', categoria: 'Sobremesa', preco: 7, ingredientes: 'Morango\nLeite\nAçúcar', modo: 'Bata, congele e sirva em casquinha.' } }, { tipo: 'prato', dados: { nome: 'Banana split', emoji: '🍓', categoria: 'Sobremesa', preco: 9, ingredientes: 'Banana\nSorvete\nCalda', modo: 'Monte tudo no prato e capriche na calda.' } }] },
+    { pitch: 'Abriu o Café das Panquecas: café da manhã o dia todo! 🥞', tipo: 'cardapio', dados: { nome: 'Café das Panquecas', tema: 'Panquecas fofas' }, filhos: [{ tipo: 'prato', dados: { nome: 'Panqueca de mel', emoji: '🥞', categoria: 'Prato principal', preco: 8, ingredientes: 'Farinha\nOvo\nLeite\nMel', modo: 'Misture, doure na frigideira com um adulto e cubra com mel.' } }, { tipo: 'prato', dados: { nome: 'Cookie gigante', emoji: '🍪', categoria: 'Sobremesa', preco: 5, ingredientes: 'Farinha\nChocolate\nManteiga', modo: 'Misture, modele e asse com um adulto.' } }] },
+  ],
   exemplo: [{
     tipo: 'cardapio', dados: { nome: 'Cantinho do Brigadeiro', tema: 'Doces de mentirinha' },
     filhos: [

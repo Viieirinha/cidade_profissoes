@@ -53,8 +53,17 @@ Todos os caminhos são relativos, então funciona em subpastas como `/NOME-DO-RE
      `ctx.ul()` e `ctx.filhos(tipo)` para **escapar** todo texto digitado. O cabeçalho, a assinatura, o carimbo
      e o rodapé de brincadeira são adicionados automaticamente pelo núcleo.
    - `exemplo` (opcional): dados leves para o botão "Criar um exemplo".
+   - `sorteios` (opcional): lista de casos leves `{ pitch, tipo, dados, filhos? }` para o botão "🎲 Sortear um caso".
+     O `pitch` é a historinha mostrada antes de aceitar; `dados` e `filhos` seguem os campos das entidades.
 3. Registre a profissão em `js/professions/index.js` (um `import` e um item na lista `PROFISSOES`).
 4. Se for abrir o site direto do disco, rode `node tools/gerar-bundle.mjs` para atualizar `js/bundle.js`.
+
+## Diversão
+
+- **🎲 Sortear um caso:** cada escritório sorteia uma situação leve (o brigadeiro sumido, o gato e o vaso…) já com o cadastro pronto; é só atender e completar.
+- **🌟 Álbum de figurinhas:** os selos viram figurinhas por profissão, com confete ao ganhar uma (desligado para quem pede menos movimento). Sem ranking.
+- **Meu escritório (Configurações):** avatar, cor dos documentos, logotipo, carimbo (forma, cor, emoji e frase) e papel timbrado, com prévia na hora. O carimbo sempre diz "DE BRINCADEIRA".
+- **📊 Relatório da cidade** na tela inicial, para imprimir ou salvar em PDF.
 
 ## Estrutura
 

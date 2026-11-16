@@ -45,6 +45,13 @@ export default {
       },
     },
   ],
+  sorteios: [
+    { pitch: 'Será que a planta gosta de música? 🌱', tipo: 'experimento', dados: { titulo: 'Será que a planta gosta de música?', hipotese: 'Acho que a plantinha vai crescer mais feliz ouvindo música.', materiais: ['Sementes', 'Caderno de anotações'] } },
+    { pitch: 'Qual objeto flutua e qual afunda na água? 💧', tipo: 'experimento', dados: { titulo: 'Flutua ou afunda?', hipotese: 'Acho que coisas leves flutuam e pesadas afundam.', materiais: ['Copo transparente', 'Caderno de anotações'] } },
+    { pitch: 'O balão consegue ficar grudado na parede esfregando no cabelo? 🎈', tipo: 'experimento', dados: { titulo: 'O balão grudento', hipotese: 'Acho que o balão vai grudar na parede por alguns segundos.', materiais: ['Balão', 'Caderno de anotações'] } },
+    { pitch: 'O que a lupa mostra de perto numa folha? 🔍', tipo: 'experimento', dados: { titulo: 'A folha de perto', hipotese: 'Acho que a folha tem muitos desenhos escondidos.', materiais: ['Lupa', 'Papel colorido', 'Caderno de anotações'] } },
+    { pitch: 'A sombra muda de tamanho durante o dia? ☀️', tipo: 'experimento', dados: { titulo: 'A sombra que cresce', hipotese: 'Acho que a sombra é maior de manhã e à tarde.', materiais: ['Régua', 'Caderno de anotações'] } },
+  ],
   exemplo: [{
     tipo: 'experimento', dados: { titulo: 'Será que a planta gosta de música?', hipotese: 'Acho que a plantinha vai crescer mais feliz ouvindo música.', materiais: ['Sementes', 'Caderno de anotações'] },
     filhos: [{ tipo: 'observacao', dados: { texto: 'A sementinha ainda está dormindo.' } }],

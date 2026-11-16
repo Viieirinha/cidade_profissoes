@@ -82,6 +82,12 @@ export default {
       },
     },
   ],
+  sorteios: [
+    { pitch: 'Nova turma: a Turma das Estrelas chegou animada! ⭐', tipo: 'turma', dados: { nome: 'Turma das Estrelas', ano: '5º ano', materias: ['Português', 'Matemática', 'Ciências'] }, filhos: [{ tipo: 'aluna', dados: { nome: 'Lia', emoji: '👧' } }, { tipo: 'aluna', dados: { nome: 'Theo', emoji: '👦' } }, { tipo: 'aluna', dados: { nome: 'Bia', emoji: '🧒' } }] },
+    { pitch: 'Nova turma: a Turma dos Dinossauros adora aprender com fósseis! 🦖', tipo: 'turma', dados: { nome: 'Turma dos Dinossauros', ano: '4º ano', materias: ['Ciências', 'História', 'Artes'] }, filhos: [{ tipo: 'aluna', dados: { nome: 'Rex', emoji: '🦸' } }, { tipo: 'aluna', dados: { nome: 'Dudu', emoji: '👦' } }, { tipo: 'aluna', dados: { nome: 'Mia', emoji: '👧' } }] },
+    { pitch: 'Nova turma: a Turma do Arco-íris tem aula de música hoje! 🌈', tipo: 'turma', dados: { nome: 'Turma do Arco-íris', ano: '6º ano', materias: ['Música', 'Português', 'Inglês'] }, filhos: [{ tipo: 'aluna', dados: { nome: 'Nina', emoji: '🧚' } }, { tipo: 'aluna', dados: { nome: 'Caio', emoji: '🧒' } }, { tipo: 'aluna', dados: { nome: 'Sol', emoji: '👧' } }] },
+    { pitch: 'Nova turma: a Turma dos Super-Heróis precisa aprender frações! 🦸', tipo: 'turma', dados: { nome: 'Turma dos Super-Heróis', ano: '5º ano', materias: ['Matemática', 'Educação Física', 'Geografia'] }, filhos: [{ tipo: 'aluna', dados: { nome: 'Capitã Lu', emoji: '🦸' } }, { tipo: 'aluna', dados: { nome: 'Raio', emoji: '🧒' } }, { tipo: 'aluna', dados: { nome: 'Pipa', emoji: '👧' } }] },
+  ],
   exemplo: [{
     tipo: 'turma', dados: { nome: 'Turma das Estrelas', ano: '5º ano', materias: ['Português', 'Matemática', 'Ciências'] },
     filhos: [{ tipo: 'aluna', dados: { nome: 'Lia', emoji: '👧' } }, { tipo: 'aluna', dados: { nome: 'Theo', emoji: '👦' } }],

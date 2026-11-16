@@ -20,6 +20,7 @@ const { toast, avisoModal } = __r("js/core/ui.js");
 const { aplicarAparencia } = __r("js/core/aparencia.js");
 const { paginaHome } = __r("js/paginas/home.js");
 const { paginaRelatorio } = __r("js/paginas/relatorio.js");
+const { paginaAlbum } = __r("js/paginas/album.js");
 const { paginaConfig } = __r("js/paginas/config.js");
 const { paginaEscritorio, paginaDetalhe, paginaForm, paginaDocumento } = __r("js/paginas/escritorio.js");
 
@@ -42,6 +43,7 @@ function iniciarApp() {
   rota('/', paginaHome);
   rota('/config', paginaConfig);
   rota('/relatorio', paginaRelatorio);
+  rota('/album', paginaAlbum);
   rota('/p/:prof', paginaEscritorio);
   rota('/p/:prof/r/:id', paginaDetalhe);
   rota('/p/:prof/novo/:tipo', paginaForm);
@@ -65,6 +67,8 @@ __defs["js/core/storage.js"] = function (__m, __r) {
 // Armazenamento local com versão de esquema e migrações.
 // Tudo fica em UMA chave do localStorage (um objeto JSON).
 
+const { marcaPadrao, normalizarMarca } = __r("js/core/marca.js");
+
 const CHAVE = 'cidade-das-profissoes';
 const VERSAO = 1;
 const TEMAS = ['claro', 'escuro'];
@@ -77,7 +81,7 @@ const ouvintesErro = [];
 function estadoInicial() {
   return {
     schema: VERSAO,
-    config: { jogadora: '', escritorio: 'Cidade das Profissões', tema: 'claro', cor: 'rosa', avisoVisto: false },
+    config: { jogadora: '', escritorio: 'Cidade das Profissões', tema: 'claro', cor: 'rosa', avisoVisto: false, marca: marcaPadrao() },
     selos: {},
     contadores: { documentos: {} },
     registros: [],
@@ -105,6 +109,7 @@ function completar(e) {
       tema: TEMAS.includes(c.tema) ? c.tema : base.config.tema,
       cor: CORES.includes(c.cor) ? c.cor : base.config.cor,
       avisoVisto: c.avisoVisto === true,
+      marca: normalizarMarca(c.marca),
     },
     selos: e && e.selos && typeof e.selos === 'object' ? e.selos : {},
     contadores: {
@@ -196,6 +201,69 @@ __m.apagarTudo = apagarTudo;
 __m.VERSAO = VERSAO;
 __m.TEMAS = TEMAS;
 __m.CORES = CORES;
+};
+
+// ---- js/core/marca.js ----
+__defs["js/core/marca.js"] = function (__m, __r) {
+// "Marca" do escritório: avatar, logotipo, carimbo e papel timbrado personalizados.
+// Tudo é validado aqui (cores só em #rrggbb, emojis curtos) porque vai parar em SVG/estilos.
+
+const PALETA = [
+  { cor: '#c2185b', nome: 'Rosa' },
+  { cor: '#7b1fa2', nome: 'Lilás' },
+  { cor: '#283593', nome: 'Azul-marinho' },
+  { cor: '#1565c0', nome: 'Azul' },
+  { cor: '#00796b', nome: 'Turquesa' },
+  { cor: '#2e7d32', nome: 'Verde' },
+  { cor: '#b34700', nome: 'Laranja' },
+  { cor: '#c62828', nome: 'Vermelho' },
+  { cor: '#5d4037', nome: 'Marrom' },
+];
+const FORMAS_LOGO = [['quadrado', 'Quadrado'], ['circulo', 'Redondo']];
+const FORMAS_CARIMBO = [['redondo', 'Redondo'], ['oval', 'Oval'], ['retangular', 'Retangular'], ['festivo', 'Festivo']];
+const TIMBRES = [['simples', 'Simples'], ['bolinhas', 'Bolinhas'], ['listras', 'Listras'], ['estrelas', 'Estrelas']];
+const AVATARES = ['👩‍💼', '👩‍⚕️', '👩‍🏫', '👩‍🍳', '🕵️‍♀️', '👩‍🚀', '👩‍🔬', '👩‍⚖️', '🧑‍🎨', '🦸‍♀️', '🧙‍♀️', '🧚', '👸', '🐱', '🦄', '🐼'];
+const EMOJIS_MARCA = ['⭐', '🌟', '💖', '🦋', '🌈', '🍀', '🌸', '🚀', '🦄', '🐾', '🎀', '👑'];
+
+function marcaPadrao() {
+  return {
+    avatar: '👩‍💼',
+    logoEmoji: '', logoForma: 'quadrado',
+    corDocs: '',
+    carimboForma: 'redondo', carimboCor: '', carimboEmoji: '', carimboFrase: '',
+    timbre: 'simples',
+  };
+}
+
+const cor = (v) => (typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v) ? v.toLowerCase() : '');
+const emoji = (v, padrao) => (typeof v === 'string' ? [...v].slice(0, 12).join('') : padrao);
+const opcao = (v, lista, padrao) => (lista.some(([k]) => k === v) ? v : padrao);
+
+// Aceita qualquer coisa e devolve uma marca segura e completa.
+function normalizarMarca(m) {
+  const p = marcaPadrao();
+  m = m && typeof m === 'object' ? m : {};
+  return {
+    avatar: emoji(m.avatar, p.avatar) || p.avatar,
+    logoEmoji: emoji(m.logoEmoji, ''),
+    logoForma: opcao(m.logoForma, FORMAS_LOGO, p.logoForma),
+    corDocs: cor(m.corDocs),
+    carimboForma: opcao(m.carimboForma, FORMAS_CARIMBO, p.carimboForma),
+    carimboCor: cor(m.carimboCor),
+    carimboEmoji: emoji(m.carimboEmoji, ''),
+    carimboFrase: typeof m.carimboFrase === 'string' ? m.carimboFrase.replace(/[<>"'&]/g, '').trim().slice(0, 18) : '',
+    timbre: opcao(m.timbre, TIMBRES, p.timbre),
+  };
+}
+
+__m.marcaPadrao = marcaPadrao;
+__m.normalizarMarca = normalizarMarca;
+__m.PALETA = PALETA;
+__m.FORMAS_LOGO = FORMAS_LOGO;
+__m.FORMAS_CARIMBO = FORMAS_CARIMBO;
+__m.TIMBRES = TIMBRES;
+__m.AVATARES = AVATARES;
+__m.EMOJIS_MARCA = EMOJIS_MARCA;
 };
 
 // ---- js/core/roteador.js ----
@@ -358,6 +426,22 @@ function confirmar(mensagem, { sim = 'Sim', nao = 'Cancelar', perigo = false } =
   });
 }
 
+// Pergunta com conteúdo em HTML (já escapado por quem chama) e botões com valores próprios.
+// Devolve o value do botão clicado, ou '' se a pessoa fechar (Esc).
+function perguntaHtml(titulo, htmlCorpo, botoes) {
+  return new Promise((resolve) => {
+    const dlg = criarDialogo(`
+      <form method="dialog">
+        <h2 class="dialogo-titulo">${esc(titulo)}</h2>
+        <div class="dialogo-texto">${htmlCorpo}</div>
+        <div class="dialogo-acoes">${botoes.map((b, i) =>
+          `<button class="btn ${b.primario ? 'btn-primario' : ''}" value="${esc(b.valor)}"${i === botoes.length - 1 ? ' autofocus' : ''}>${esc(b.rotulo)}</button>`).join('')}</div>
+      </form>`);
+    dlg.addEventListener('close', () => resolve(dlg.returnValue || ''));
+    dlg.showModal();
+  });
+}
+
 function avisoModal(titulo, htmlCorpo, botao = 'Entendi!') {
   return new Promise((resolve) => {
     const dlg = criarDialogo(`
@@ -378,6 +462,7 @@ __m.dataEstelar = dataEstelar;
 __m.fmtRelativo = fmtRelativo;
 __m.toast = toast;
 __m.confirmar = confirmar;
+__m.perguntaHtml = perguntaHtml;
 __m.avisoModal = avisoModal;
 __m.esc = esc;
 __m.par = par;
@@ -410,6 +495,7 @@ const { obter, listar } = __r("js/core/entidades.js");
 const { tituloReg } = __r("js/core/modelo.js");
 const { todosSelos, totalAtendimentos } = __r("js/core/selos.js");
 const { esc, fmtRelativo } = __r("js/core/ui.js");
+const { htmlFigurinha } = __r("js/paginas/album.js");
 
 function paginaHome() {
   const { config, recentes } = getEstado();
@@ -441,7 +527,7 @@ function paginaHome() {
 
   document.getElementById('app').innerHTML = `
     <section class="hero">
-      <h1 tabindex="-1">${nome ? `Olá, ${esc(nome)}! 👋` : 'Bem-vinda à cidade! 👋'}</h1>
+      <h1 tabindex="-1"><span aria-hidden="true">${esc(config.marca.avatar)}</span> ${nome ? `Olá, ${esc(nome)}! 👋` : 'Bem-vinda à cidade! 👋'}</h1>
       <p>${esc(config.escritorio)} — escolha um prédio para começar a trabalhar.</p>
       <p class="acoes">${nome ? '' : '<a class="btn btn-primario" href="#/config">✏️ Dizer meu nome</a>'}<a class="btn" href="#/relatorio">📊 Relatório da cidade</a></p>
       <ul class="estatisticas" aria-label="Seu progresso">
@@ -458,9 +544,10 @@ function paginaHome() {
       ${docs ? `<ul class="lista-itens">${docs}</ul>` : '<p class="vazio-texto">Ainda não há documentos. Atenda alguém e abra uma receita, boletim ou relatório! 📄</p>'}
     </section>
     <section aria-labelledby="t-selos">
-      <h2 id="t-selos">Meus selos</h2>
-      ${ganhos.length ? `<ul class="selos">${ganhos.map((s) => `<li class="selo"><span aria-hidden="true">${s.emoji}</span> ${esc(s.titulo)}</li>`).join('')}</ul>`
-        : '<p class="vazio-texto">Os selos aparecem aqui quando você atende e cria coisas. Sem pressa! 🌈</p>'}
+      <h2 id="t-selos">Meu álbum de selos</h2>
+      ${ganhos.length ? `<ul class="figurinhas">${[...ganhos].sort((a, b) => (getEstado().selos[b.id] || '').localeCompare(getEstado().selos[a.id] || '')).slice(0, 6).map((s) => htmlFigurinha(s, (porId(s.grupo) || { cor: '#c2185b' }).cor)).join('')}</ul>`
+        : '<p class="vazio-texto">As figurinhas aparecem aqui quando você atende e cria coisas. Sem pressa! 🌈</p>'}
+      <p><a class="btn" href="#/album">🌟 Abrir meu álbum completo</a></p>
     </section>`;
 }
 
@@ -582,6 +669,14 @@ __m.default = {
         ${c.d.recomendacoes && c.d.recomendacoes.length ? `<section class="doc-bloco"><h4>Recomendações</h4>${c.ul(c.d.recomendacoes)}</section>` : ''}
         ${c.campo('Retorno', c.d.retorno ? c.data(c.d.retorno) : '')}`,
     },
+  ],
+  sorteios: [
+    { pitch: 'Ursinho Teddy perdeu um botão do olho e está muito chateado. 🧸', tipo: 'paciente', dados: { nome: 'Ursinho Teddy', idade: 5, tipo: 'Ursinho de pelúcia', obs: 'Adora abraços.' }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Saudade do brinquedo favorito'], sintomasLivre: 'Perdeu um botão do olho.', temperatura: 36.5, batimentos: 90, peso: 1.2 } }] },
+    { pitch: 'A boneca Margarida está com soluço de dragão desde o café da manhã. 🐉', tipo: 'paciente', dados: { nome: 'Boneca Margarida', idade: 8, tipo: 'Boneca' }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Soluço de dragão', 'Cócegas nas orelhas'], temperatura: 36.7, batimentos: 95 } }] },
+    { pitch: 'O dinossauro Beto comeu 10 brigadeiros imaginários e a barriguinha está roncando. 🦕', tipo: 'paciente', dados: { nome: 'Dino Beto', idade: 6, tipo: 'Bichinho de pelúcia' }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Barriguinha roncando', 'Sono demais'], peso: 3.4 } }] },
+    { pitch: 'Vovó Lu dançou o dia inteiro e está com os pés dormentes de tanto balançar. 💃', tipo: 'paciente', dados: { nome: 'Vovó Lu', idade: 70, tipo: 'Amiga ou amigo' }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Pé dormente de tanto dançar', 'Cansaço'], temperatura: 36.4 } }] },
+    { pitch: 'O coelho Pipoca está com o nariz escorrendo e muitos espirros de glitter. 🐰', tipo: 'paciente', dados: { nome: 'Coelho Pipoca', idade: 3, tipo: 'Bichinho de pelúcia' }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Nariz escorrendo', 'Espirros'], temperatura: 36.8 } }] },
+    { pitch: 'A Capitã Estrela voltou da Lua com muito sono e saudade da Terra. 🌙', tipo: 'paciente', dados: { nome: 'Capitã Estrela', idade: 9, tipo: 'Boneca' }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Sono demais', 'Saudade do brinquedo favorito'], batimentos: 80 } }] },
   ],
   exemplo: [
     {
@@ -722,6 +817,13 @@ __m.default = {
       },
     },
   ],
+  sorteios: [
+    { pitch: 'O gato Mingau derrubou o vaso e agora está com cara de inocente. 🐱', tipo: 'pet', dados: { nome: 'Mingau', emoji: '🐱', especie: 'Gato', tutor: 'Vovó Lu', idade: 3 }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Derrubou o vaso', 'Ronronando demais'], peso: 4.1 } }] },
+    { pitch: 'A hamster Pipoca não quer mais brincar na rodinha. 🐹', tipo: 'pet', dados: { nome: 'Pipoca', emoji: '🐹', especie: 'Hamster', tutor: 'Lia', idade: 1 }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Não quer brincar'], peso: 0.1 } }] },
+    { pitch: 'O cachorro Bolota está com latido de alegria e não para de abanar o rabinho! 🐶', tipo: 'pet', dados: { nome: 'Bolota', emoji: '🐶', especie: 'Cachorro', tutor: 'Theo', idade: 2 }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Latido de alegria', 'Rabinho balançando sem parar'], peso: 9 } }] },
+    { pitch: 'O dragãozinho Fumaça está espirrando faíscas de mentirinha. 🐉', tipo: 'pet', dados: { nome: 'Fumaça', emoji: '🐉', especie: 'Dragão de faz de conta', tutor: 'Capitã Estrela', idade: 100 }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Bigodinhos tortos'], sintomasLivre: 'Espirra faíscas coloridas.' } }] },
+    { pitch: 'O coelhinho de pelúcia Algodão está com a costura soltinha no bracinho. 🧸', tipo: 'pet', dados: { nome: 'Algodão', emoji: '🧸', especie: 'Ursinho de pelúcia', tutor: 'Bia', idade: 4 }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Costura soltinha (pelúcia)'], peso: 0.3 } }] },
+  ],
   exemplo: [{
     tipo: 'pet',
     dados: { nome: 'Mingau', emoji: '🐱', especie: 'Gato', tutor: 'Vovó Lu', idade: 3, obs: 'Derruba vasos por esporte.' },
@@ -740,6 +842,9 @@ __defs["js/professions/dentista.js"] = function (__m, __r) {
 const { txt, area, num, data, sel, chips, odontograma } = __r("js/core/campos.js");
 const { htmlOdontograma } = __r("js/core/formulario.js");
 const { fmtData } = __r("js/core/ui.js");
+
+// Monta os 32 dentes: D({ 3: 'e' }) deixa o dente 3 "precisando de escovinha" e o resto saudável.
+const D = (m) => Array.from({ length: 32 }, (_, i) => m[i + 1] || 's');
 
 __m.default = {
   id: 'dentista',
@@ -799,6 +904,13 @@ __m.default = {
         <section class="doc-bloco"><h4>Odontograma</h4>${htmlOdontograma(c.d.dentes, false)}</section>
         ${c.bloco('Anotações', c.d.obs)}`,
     },
+  ],
+  sorteios: [
+    { pitch: 'A boneca Rosinha precisa de uma visita de rotina para o sorriso ficar brilhando. ✨', tipo: 'paciente', dados: { nome: 'Boneca Rosinha', idade: 7, tipo: 'Boneca', dentes: D({ 4: 'b', 5: 'b', 20: 'e' }) }, filhos: [{ tipo: 'consulta', dados: { motivo: ['Visita de rotina'] } }] },
+    { pitch: 'O ursinho Teddy está com um dentinho mole e quer falar com a Fada do Dente. 🧚', tipo: 'paciente', dados: { nome: 'Ursinho Teddy', idade: 5, tipo: 'Ursinho de pelúcia', dentes: D({ 9: 'f', 24: 'f' }) }, filhos: [{ tipo: 'consulta', dados: { motivo: ['Dentinho mole (fada do dente!)'] } }] },
+    { pitch: 'O dragão Chama vai tirar uma foto e quer um sorriso de cinema. 📸', tipo: 'paciente', dados: { nome: 'Dragão Chama', idade: 300, tipo: 'Dragão de faz de conta', dentes: D({ 1: 'e', 2: 'e', 16: 'e' }) }, filhos: [{ tipo: 'consulta', dados: { motivo: ['Sorriso para a foto'] } }] },
+    { pitch: 'O vovô Beto ganhou uma escova nova colorida e quer testar. 🪥', tipo: 'paciente', dados: { nome: 'Vovô Beto', idade: 68, tipo: 'Amiga ou amigo', dentes: D({ 12: 'o', 13: 'b' }) }, filhos: [{ tipo: 'consulta', dados: { motivo: ['Escova nova'] } }] },
+    { pitch: 'O leão Leo diz que seus dentes estão brilhando mais que o sol. ☀️', tipo: 'paciente', dados: { nome: 'Leão Leo', idade: 10, tipo: 'Bichinho de pelúcia', dentes: D({ 7: 'b', 8: 'b', 25: 'b', 26: 'b' }) }, filhos: [{ tipo: 'consulta', dados: { motivo: ['Dentinho brilhando'] } }] },
   ],
   exemplo: [{
     tipo: 'paciente',
@@ -1130,6 +1242,13 @@ __m.default = {
       },
     },
   ],
+  sorteios: [
+    { pitch: 'O sumiço do brigadeiro: Dona Brigadeira acusa o gato Mingau. 🍫', tipo: 'cliente', dados: { nome: 'Dona Brigadeira', tipo: 'Empresa de brigadeiro' }, filhos: [{ tipo: 'caso', dados: { titulo: 'O sumiço do brigadeiro', autor: 'Dona Brigadeira', reu: 'Gato Mingau', fatos: 'O brigadeiro sumiu da bancada e só restaram migalhas de chocolate.', provas: ['Migalhas de chocolate', 'Pegadas de patinha'] } }] },
+    { pitch: 'A bicicleta emprestada: Theo quer sua bicicleta de volta há uma semana. 🚲', tipo: 'cliente', dados: { nome: 'Theo', tipo: 'Amiga ou amigo' }, filhos: [{ tipo: 'caso', dados: { titulo: 'A bicicleta emprestada', autor: 'Theo', reu: 'Lia', fatos: 'A bicicleta foi emprestada para um passeio rápido e ainda não voltou.', provas: ['Bilhete misterioso'] } }] },
+    { pitch: 'O pega-pega: quem tocou primeiro no pique? Ninguém concorda! 🏃', tipo: 'cliente', dados: { nome: 'Bia', tipo: 'Amiga ou amigo' }, filhos: [{ tipo: 'caso', dados: { titulo: 'Quem tocou primeiro no pique', autor: 'Bia', reu: 'Dudu', fatos: 'Na brincadeira de pega-pega, os dois dizem que chegaram primeiro.' } }] },
+    { pitch: 'O bolo secreto: alguém contou a receita da vovó para a vizinhança inteira! 🎂', tipo: 'cliente', dados: { nome: 'Vovó Lu', tipo: 'Amiga ou amigo' }, filhos: [{ tipo: 'caso', dados: { titulo: 'A receita secreta do bolo', autor: 'Vovó Lu', reu: 'Papagaio Zeca', fatos: 'O papagaio repetiu a receita em voz alta na feira.', provas: ['Testemunha: o gato 🐱'] } }] },
+    { pitch: 'O ursinho Teddy quer um quarto só para ele, mas os brinquedos não querem sair. 🧸', tipo: 'cliente', dados: { nome: 'Ursinho Teddy', tipo: 'Ursinho de pelúcia' }, filhos: [{ tipo: 'caso', dados: { titulo: 'O quarto dos brinquedos', autor: 'Ursinho Teddy', reu: 'Os brinquedos do baú', fatos: 'Todos querem dormir na cama de cima.' } }] },
+  ],
   exemplo: [{
     tipo: 'cliente', dados: { nome: 'Dona Brigadeira', tipo: 'Empresa de brigadeiro' },
     filhos: [
@@ -1193,6 +1312,13 @@ __m.default = {
         ${c.bloco('Decisão', c.d.decisao)}
         <p style="margin-top:1rem"><em>Assim decido. Publique-se, registre-se e brinque-se!</em></p>`,
     },
+  ],
+  sorteios: [
+    { pitch: 'O gato e o vaso: o gato jura que foi o vento. 🐱', tipo: 'caso', dados: { titulo: 'O gato e o vaso', autor: 'Vovó Lu', reu: 'Gato Mingau', resumo: 'O vaso de flores apareceu no chão. O gato diz que foi o vento.', status: 'Na pauta' } },
+    { pitch: 'Quem comeu o último pedaço de bolo? Duas pessoas dizem que não foram. 🍰', tipo: 'caso', dados: { titulo: 'O último pedaço de bolo', autor: 'Bia', reu: 'Theo', resumo: 'O prato ficou vazio e só sobrou um guardanapo com chocolate.', status: 'Na pauta' } },
+    { pitch: 'O castelo de almofadas desabou na hora do filme. 🏰', tipo: 'caso', dados: { titulo: 'O castelo de almofadas', autor: 'Lia', reu: 'Dudu', resumo: 'O castelo caiu quando alguém passou correndo.', status: 'Na pauta' } },
+    { pitch: 'A fila do escorregador: alguém furou a fila? 🛝', tipo: 'caso', dados: { titulo: 'A fila do escorregador', autor: 'Bia', reu: 'Pipoca, o coelho', resumo: 'O coelho pulou na frente de todo mundo.', status: 'Na pauta' } },
+    { pitch: 'O desenho de giz na calçada foi pisado pelo cachorro. 🎨', tipo: 'caso', dados: { titulo: 'O desenho de giz', autor: 'Lia', reu: 'Cachorro Bolota', resumo: 'O desenho ficou com pegadas, mas o cachorro nega tudo.', status: 'Na pauta' } },
   ],
   exemplo: [{
     tipo: 'caso', dados: { titulo: 'O gato e o vaso', autor: 'Vovó Lu', reu: 'Gato Mingau', resumo: 'O vaso de flores apareceu no chão. O gato jura que foi o vento.', status: 'Na pauta' },
@@ -1288,6 +1414,12 @@ __m.default = {
           </tbody></table>`;
       },
     },
+  ],
+  sorteios: [
+    { pitch: 'Nova turma: a Turma das Estrelas chegou animada! ⭐', tipo: 'turma', dados: { nome: 'Turma das Estrelas', ano: '5º ano', materias: ['Português', 'Matemática', 'Ciências'] }, filhos: [{ tipo: 'aluna', dados: { nome: 'Lia', emoji: '👧' } }, { tipo: 'aluna', dados: { nome: 'Theo', emoji: '👦' } }, { tipo: 'aluna', dados: { nome: 'Bia', emoji: '🧒' } }] },
+    { pitch: 'Nova turma: a Turma dos Dinossauros adora aprender com fósseis! 🦖', tipo: 'turma', dados: { nome: 'Turma dos Dinossauros', ano: '4º ano', materias: ['Ciências', 'História', 'Artes'] }, filhos: [{ tipo: 'aluna', dados: { nome: 'Rex', emoji: '🦸' } }, { tipo: 'aluna', dados: { nome: 'Dudu', emoji: '👦' } }, { tipo: 'aluna', dados: { nome: 'Mia', emoji: '👧' } }] },
+    { pitch: 'Nova turma: a Turma do Arco-íris tem aula de música hoje! 🌈', tipo: 'turma', dados: { nome: 'Turma do Arco-íris', ano: '6º ano', materias: ['Música', 'Português', 'Inglês'] }, filhos: [{ tipo: 'aluna', dados: { nome: 'Nina', emoji: '🧚' } }, { tipo: 'aluna', dados: { nome: 'Caio', emoji: '🧒' } }, { tipo: 'aluna', dados: { nome: 'Sol', emoji: '👧' } }] },
+    { pitch: 'Nova turma: a Turma dos Super-Heróis precisa aprender frações! 🦸', tipo: 'turma', dados: { nome: 'Turma dos Super-Heróis', ano: '5º ano', materias: ['Matemática', 'Educação Física', 'Geografia'] }, filhos: [{ tipo: 'aluna', dados: { nome: 'Capitã Lu', emoji: '🦸' } }, { tipo: 'aluna', dados: { nome: 'Raio', emoji: '🧒' } }, { tipo: 'aluna', dados: { nome: 'Pipa', emoji: '👧' } }] },
   ],
   exemplo: [{
     tipo: 'turma', dados: { nome: 'Turma das Estrelas', ano: '5º ano', materias: ['Português', 'Matemática', 'Ciências'] },
@@ -1387,6 +1519,12 @@ __m.default = {
       },
     },
   ],
+  sorteios: [
+    { pitch: 'Abriu o Cantinho do Brigadeiro: doces de colher para todo mundo! 🍫', tipo: 'cardapio', dados: { nome: 'Cantinho do Brigadeiro', tema: 'Doces de mentirinha' }, filhos: [{ tipo: 'prato', dados: { nome: 'Brigadeiro de colher', emoji: '🍫', categoria: 'Sobremesa', preco: 6, ingredientes: 'Chocolate\nCarinho\nUma pitada de risada', modo: 'Misture tudo com capricho e sirva com um sorriso.' } }, { tipo: 'prato', dados: { nome: 'Suco de morango', emoji: '🍓', categoria: 'Bebida', preco: 4, ingredientes: 'Morangos\nGelo', modo: 'Bata tudo e sirva gelado.' } }] },
+    { pitch: 'Abriu a Pizzaria da Lua: pizzas redondas como a lua cheia! 🌕', tipo: 'cardapio', dados: { nome: 'Pizzaria da Lua', tema: 'Pizzas espaciais' }, filhos: [{ tipo: 'prato', dados: { nome: 'Pizza Lua Cheia', emoji: '🍕', categoria: 'Prato principal', preco: 18, ingredientes: 'Massa\nQueijo\nTomate', modo: 'Abra a massa, cubra com queijo e tomate e asse com um adulto.' } }, { tipo: 'prato', dados: { nome: 'Suco de estrela', emoji: '🧃', categoria: 'Bebida', preco: 5, ingredientes: 'Maracujá\nBrilho de mentirinha', modo: 'Misture e sirva.' } }] },
+    { pitch: 'Abriu a Sorveteria Polar: sorvetes para o dia mais quente! 🍦', tipo: 'cardapio', dados: { nome: 'Sorveteria Polar', tema: 'Sorvetes de pinguim' }, filhos: [{ tipo: 'prato', dados: { nome: 'Sorvete de morango', emoji: '🍦', categoria: 'Sobremesa', preco: 7, ingredientes: 'Morango\nLeite\nAçúcar', modo: 'Bata, congele e sirva em casquinha.' } }, { tipo: 'prato', dados: { nome: 'Banana split', emoji: '🍓', categoria: 'Sobremesa', preco: 9, ingredientes: 'Banana\nSorvete\nCalda', modo: 'Monte tudo no prato e capriche na calda.' } }] },
+    { pitch: 'Abriu o Café das Panquecas: café da manhã o dia todo! 🥞', tipo: 'cardapio', dados: { nome: 'Café das Panquecas', tema: 'Panquecas fofas' }, filhos: [{ tipo: 'prato', dados: { nome: 'Panqueca de mel', emoji: '🥞', categoria: 'Prato principal', preco: 8, ingredientes: 'Farinha\nOvo\nLeite\nMel', modo: 'Misture, doure na frigideira com um adulto e cubra com mel.' } }, { tipo: 'prato', dados: { nome: 'Cookie gigante', emoji: '🍪', categoria: 'Sobremesa', preco: 5, ingredientes: 'Farinha\nChocolate\nManteiga', modo: 'Misture, modele e asse com um adulto.' } }] },
+  ],
   exemplo: [{
     tipo: 'cardapio', dados: { nome: 'Cantinho do Brigadeiro', tema: 'Doces de mentirinha' },
     filhos: [
@@ -1477,6 +1615,13 @@ __m.default = {
       },
     },
   ],
+  sorteios: [
+    { pitch: 'O mistério do brigadeiro sumido na cozinha da vovó. 🍫', tipo: 'caso', dados: { titulo: 'O mistério do brigadeiro sumido', resumo: 'O brigadeiro da panela desapareceu durante a tarde.', local: 'Cozinha da vovó', status: 'Investigando' }, filhos: [{ tipo: 'suspeito', dados: { nome: 'Gato Mingau', emoji: '🐱', alibi: 'Estava dormindo no sofá.', nivel: 'Média' } }, { tipo: 'suspeito', dados: { nome: 'Papagaio Zeca', emoji: '🤖', alibi: 'Estava cantando no quintal.', nivel: 'Baixa' } }, { tipo: 'pista', dados: { descricao: 'Pegadas de patinha na farinha', emoji: '👣' } }, { tipo: 'pista', dados: { descricao: 'Migalhas de chocolate no tapete', emoji: '🍫' } }] },
+    { pitch: 'Quem escondeu os óculos da vovó? Eles estavam na cabeça dela! 👓', tipo: 'caso', dados: { titulo: 'Os óculos desaparecidos', resumo: 'A vovó procurou por toda a casa e não achou os óculos.', local: 'Sala de estar', status: 'Investigando' }, filhos: [{ tipo: 'suspeito', dados: { nome: 'Cachorro Bolota', emoji: '🐶', alibi: 'Estava no passeio.', nivel: 'Baixa' } }, { tipo: 'suspeito', dados: { nome: 'Neto Theo', emoji: '🧑', alibi: 'Estava lendo um gibi.', nivel: 'Média' } }, { tipo: 'pista', dados: { descricao: 'Uma lente brilhando no sofá', emoji: '🔎' } }] },
+    { pitch: 'O sumiço do último biscoito do pote. 🍪', tipo: 'caso', dados: { titulo: 'O último biscoito', resumo: 'O pote estava cheio de manhã e à noite só tinha farelo.', local: 'Cozinha', status: 'Investigando' }, filhos: [{ tipo: 'suspeito', dados: { nome: 'Rato Queijinho', emoji: '🐭', alibi: 'Estava na casa de um amigo.', nivel: 'Média' } }, { tipo: 'suspeito', dados: { nome: 'Fantasma Fofo', emoji: '👻', alibi: 'Estava assustando a cortina.', nivel: 'Alta' } }, { tipo: 'pista', dados: { descricao: 'Farelos em fila indiana', emoji: '🪶' } }] },
+    { pitch: 'Quem pintou as pegadas coloridas no corredor? 🎨', tipo: 'caso', dados: { titulo: 'As pegadas coloridas', resumo: 'Apareceram pegadas de tinta azul e rosa em todo o corredor.', local: 'Corredor da escola', status: 'Investigando' }, filhos: [{ tipo: 'suspeito', dados: { nome: 'Pintora Mia', emoji: '🧑', alibi: 'Estava na aula de artes.', nivel: 'Baixa' } }, { tipo: 'suspeito', dados: { nome: 'Gato Mingau', emoji: '🐱', alibi: 'Dormindo na mochila.', nivel: 'Média' } }, { tipo: 'pista', dados: { descricao: 'Pegadas de patinha pequena', emoji: '👣' } }] },
+    { pitch: 'A chave do baú de brinquedos sumiu. 🗝️', tipo: 'caso', dados: { titulo: 'A chave do baú', resumo: 'O baú de brinquedos está trancado e ninguém acha a chave.', local: 'Quarto de brinquedos', status: 'Investigando' }, filhos: [{ tipo: 'suspeito', dados: { nome: 'Gatinho Tico', emoji: '🐱', alibi: 'Estava abraçando a Lia.', nivel: 'Baixa' } }, { tipo: 'pista', dados: { descricao: 'Um barbante com uma chave desenhada', emoji: '🗝️' } }] },
+  ],
   exemplo: [{
     tipo: 'caso', dados: { titulo: 'O mistério do brigadeiro sumido', resumo: 'O brigadeiro da panela desapareceu durante a tarde.', local: 'Cozinha da vovó', status: 'Investigando' },
     filhos: [
@@ -1549,6 +1694,12 @@ __m.default = {
         <p>${c.par(c.d.texto || '')}</p>${c.campo('Editoria', c.d.editoria)}`,
     },
   ],
+  sorteios: [
+    { pitch: 'Primeira página: o gato derrubou o vaso, o bairro inteiro quer saber! 🐱', tipo: 'edicao', dados: { nome: 'O Diário da Cidade', lema: 'Notícias fofas todo dia' }, filhos: [{ tipo: 'materia', dados: { titulo: 'Gato derruba vaso e jura inocência', linhaFina: 'Testemunhas viram apenas um rabinho balançando.', cena: '🐱🌷', editoria: 'Bichinhos', destaque: 'Matéria principal' } }] },
+    { pitch: 'Primeira página: o festival do brigadeiro bateu recorde! 🍫', tipo: 'edicao', dados: { nome: 'Gazeta Doce', lema: 'Doce de ler' }, filhos: [{ tipo: 'materia', dados: { titulo: 'Festival do brigadeiro bate recorde', linhaFina: 'Foram mais de mil colheres de alegria.', cena: '🍫🎉', editoria: 'Culinária', destaque: 'Matéria principal' } }] },
+    { pitch: 'Primeira página: o time da escola ganhou o campeonato de pega-pega! 🏃', tipo: 'edicao', dados: { nome: 'Jornal da Escola', lema: 'Tudo que acontece no recreio' }, filhos: [{ tipo: 'materia', dados: { titulo: 'Time do 5º ano vence o grande pega-pega', linhaFina: 'A torcida pulou de alegria.', cena: '🏃🏆', editoria: 'Esportes', destaque: 'Matéria principal' } }] },
+    { pitch: 'Primeira página: um foguete de papelão chegou à Lua do quintal! 🚀', tipo: 'edicao', dados: { nome: 'Folha Espacial', lema: 'Notícias de outro mundo' }, filhos: [{ tipo: 'materia', dados: { titulo: 'Foguete de papelão aterrissa no quintal', linhaFina: 'A tripulação voltou com sorrisos e muitas histórias.', cena: '🚀🌙', editoria: 'Ciência', destaque: 'Matéria principal' } }] },
+  ],
   exemplo: [{
     tipo: 'edicao', dados: { nome: 'O Diário da Cidade', lema: 'Notícias fofas todo dia' },
     filhos: [
@@ -1619,6 +1770,12 @@ __m.default = {
       },
     },
   ],
+  sorteios: [
+    { pitch: 'Missão Estrela Cintilante: descobrir de onde vêm as estrelas cadentes. ⭐', tipo: 'missao', dados: { nome: 'Missão Estrela Cintilante', destino: 'Estrela Cintilante', nave: 'Foguete Arco-íris', objetivo: 'Descobrir de onde vêm as estrelas cadentes.' }, filhos: [{ tipo: 'tripulante', dados: { nome: 'Capitã Lia', emoji: '👩‍🚀', funcao: 'Comandante' } }, { tipo: 'tripulante', dados: { nome: 'Gato Astro', emoji: '🐱', funcao: 'Mascote' } }] },
+    { pitch: 'Missão Planeta de Brigadeiro: provar uma colher de espaço! 🍫', tipo: 'missao', dados: { nome: 'Missão Planeta de Brigadeiro', destino: 'Planeta de Brigadeiro', nave: 'Foguete Colher', objetivo: 'Descobrir se o planeta é mesmo doce.' }, filhos: [{ tipo: 'tripulante', dados: { nome: 'Chef Teo', emoji: '🧑‍🚀', funcao: 'Cozinheira espacial' } }, { tipo: 'tripulante', dados: { nome: 'Robô Beep', emoji: '🤖', funcao: 'Engenheira' } }] },
+    { pitch: 'Missão Lua: plantar uma bandeira de sorrisos. 🌙', tipo: 'missao', dados: { nome: 'Missão Lua', destino: 'Lua', nave: 'Nave Lunar', objetivo: 'Plantar uma bandeira de sorrisos na Lua.' }, filhos: [{ tipo: 'tripulante', dados: { nome: 'Piloto Dudu', emoji: '👨‍🚀', funcao: 'Piloto' } }, { tipo: 'tripulante', dados: { nome: 'Dra. Mia', emoji: '👩‍🚀', funcao: 'Cientista' } }] },
+    { pitch: 'Missão Saturno: contar quantos anéis o planeta tem. 🪐', tipo: 'missao', dados: { nome: 'Missão Saturno', destino: 'Saturno', nave: 'Foguete Anelzinho', objetivo: 'Contar os anéis e fazer um desenho.' }, filhos: [{ tipo: 'tripulante', dados: { nome: 'Capitão Raio', emoji: '🧑‍🚀', funcao: 'Comandante' } }, { tipo: 'tripulante', dados: { nome: 'Alien Gui', emoji: '👽', funcao: 'Mascote' } }] },
+  ],
   exemplo: [{
     tipo: 'missao', dados: { nome: 'Missão Estrela Cintilante', destino: 'Estrela Cintilante', nave: 'Foguete Arco-íris', objetivo: 'Descobrir de onde vêm as estrelas cadentes.' },
     filhos: [
@@ -1679,6 +1836,13 @@ __m.default = {
           ${c.bloco('Conclusão', c.d.conclusao)}`;
       },
     },
+  ],
+  sorteios: [
+    { pitch: 'Será que a planta gosta de música? 🌱', tipo: 'experimento', dados: { titulo: 'Será que a planta gosta de música?', hipotese: 'Acho que a plantinha vai crescer mais feliz ouvindo música.', materiais: ['Sementes', 'Caderno de anotações'] } },
+    { pitch: 'Qual objeto flutua e qual afunda na água? 💧', tipo: 'experimento', dados: { titulo: 'Flutua ou afunda?', hipotese: 'Acho que coisas leves flutuam e pesadas afundam.', materiais: ['Copo transparente', 'Caderno de anotações'] } },
+    { pitch: 'O balão consegue ficar grudado na parede esfregando no cabelo? 🎈', tipo: 'experimento', dados: { titulo: 'O balão grudento', hipotese: 'Acho que o balão vai grudar na parede por alguns segundos.', materiais: ['Balão', 'Caderno de anotações'] } },
+    { pitch: 'O que a lupa mostra de perto numa folha? 🔍', tipo: 'experimento', dados: { titulo: 'A folha de perto', hipotese: 'Acho que a folha tem muitos desenhos escondidos.', materiais: ['Lupa', 'Papel colorido', 'Caderno de anotações'] } },
+    { pitch: 'A sombra muda de tamanho durante o dia? ☀️', tipo: 'experimento', dados: { titulo: 'A sombra que cresce', hipotese: 'Acho que a sombra é maior de manhã e à tarde.', materiais: ['Régua', 'Caderno de anotações'] } },
   ],
   exemplo: [{
     tipo: 'experimento', dados: { titulo: 'Será que a planta gosta de música?', hipotese: 'Acho que a plantinha vai crescer mais feliz ouvindo música.', materiais: ['Sementes', 'Caderno de anotações'] },
@@ -1837,6 +2001,7 @@ const { getEstado, salvar } = __r("js/core/storage.js");
 const { listar } = __r("js/core/entidades.js");
 const { PROFISSOES } = __r("js/professions/index.js");
 const { toast } = __r("js/core/ui.js");
+const { confete } = __r("js/core/confete.js");
 
 const FRASES = [
   'Que trabalho lindo! ✨', 'Você está arrasando! 🌟', 'Mais um caso resolvido com carinho! 💖',
@@ -1862,18 +2027,18 @@ function todosSelos() {
     const docs = e.contadores.documentos[p.id] || 0;
     const t = p.selos || {};
     lista.push(
-      { id: `${p.id}-cadastro`, emoji: p.emoji, titulo: t.cadastro || `Primeiro cadastro em ${p.nome}!`, ok: listar(p.id, raiz.id).length >= 1 },
-      { id: `${p.id}-atendimento`, emoji: '🌟', titulo: t.atendimento || `Primeiro atendimento em ${p.nome}!`, ok: at >= 1 },
-      { id: `${p.id}-cinco`, emoji: '🏅', titulo: `5 atendimentos em ${p.nome}!`, ok: at >= 5 },
-      { id: `${p.id}-documento`, emoji: '🖨️', titulo: `Primeiro documento impresso (${p.nome})!`, ok: docs >= 1 },
+      { grupo: p.id, id: `${p.id}-cadastro`, emoji: p.emoji, titulo: t.cadastro || `Primeiro cadastro em ${p.nome}!`, ok: listar(p.id, raiz.id).length >= 1 },
+      { grupo: p.id, id: `${p.id}-atendimento`, emoji: '🌟', titulo: t.atendimento || `Primeiro atendimento em ${p.nome}!`, ok: at >= 1 },
+      { grupo: p.id, id: `${p.id}-cinco`, emoji: '🏅', titulo: `5 atendimentos em ${p.nome}!`, ok: at >= 5 },
+      { grupo: p.id, id: `${p.id}-documento`, emoji: '🖨️', titulo: `Primeiro documento impresso (${p.nome})!`, ok: docs >= 1 },
     );
   }
   const exploradas = PROFISSOES.filter((p) => listar(p.id, p.entidades[0].id).length > 0).length;
   const total = totalAtendimentos();
   lista.push(
-    { id: 'g-10', emoji: '🎉', titulo: '10 atendimentos na cidade!', ok: total >= 10 },
-    { id: 'g-3prof', emoji: '🏙️', titulo: 'Cidade movimentada: 3 profissões!', ok: exploradas >= 3 },
-    { id: 'g-6prof', emoji: '🌈', titulo: 'Super cidade: 6 profissões!', ok: exploradas >= 6 },
+    { grupo: 'geral', id: 'g-10', emoji: '🎉', titulo: '10 atendimentos na cidade!', ok: total >= 10 },
+    { grupo: 'geral', id: 'g-3prof', emoji: '🏙️', titulo: 'Cidade movimentada: 3 profissões!', ok: exploradas >= 3 },
+    { grupo: 'geral', id: 'g-6prof', emoji: '🌈', titulo: 'Super cidade: 6 profissões!', ok: exploradas >= 6 },
   );
   return lista;
 }
@@ -1885,7 +2050,8 @@ function verificarSelos() {
   if (!novos.length) return [];
   novos.forEach((s) => { e.selos[s.id] = new Date().toISOString(); });
   salvar();
-  novos.forEach((s, i) => setTimeout(() => toast(`${s.emoji} Selo novo: ${s.titulo}`, 5000), i * 600));
+  novos.forEach((s, i) => setTimeout(() => toast(`${s.emoji} Figurinha nova: ${s.titulo}`, 5000), i * 600));
+  confete();
   return novos;
 }
 
@@ -1893,6 +2059,77 @@ __m.totalAtendimentos = totalAtendimentos;
 __m.todosSelos = todosSelos;
 __m.verificarSelos = verificarSelos;
 __m.incentivo = incentivo;
+};
+
+// ---- js/core/confete.js ----
+__defs["js/core/confete.js"] = function (__m, __r) {
+// Chuva de confete curtinha (some sozinha; não roda se a pessoa pediu menos movimento).
+const CORES = ['#c2185b', '#7b1fa2', '#1565c0', '#2e7d32', '#f9a825', '#ef6c00'];
+const FORMAS = ['⭐', '🎉', '✨', '💖', '🌈', '🎈'];
+
+function confete(qtd = 36) {
+  try {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  } catch (e) { /* segue */ }
+  const area = document.createElement('div');
+  area.className = 'confete';
+  area.setAttribute('aria-hidden', 'true');
+  for (let i = 0; i < qtd; i++) {
+    const p = document.createElement('span');
+    const emoji = i % 3 === 0;
+    p.textContent = emoji ? FORMAS[i % FORMAS.length] : '';
+    if (!emoji) p.style.background = CORES[i % CORES.length];
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.animationDelay = Math.random() * 0.6 + 's';
+    p.style.animationDuration = 1.8 + Math.random() * 1.4 + 's';
+    p.style.setProperty('--giro', Math.round(Math.random() * 720 - 360) + 'deg');
+    area.appendChild(p);
+  }
+  document.body.appendChild(area);
+  setTimeout(() => area.remove(), 3800);
+}
+
+__m.confete = confete;
+};
+
+// ---- js/paginas/album.js ----
+__defs["js/paginas/album.js"] = function (__m, __r) {
+// Álbum de figurinhas: os selos de todas as profissões, sem ranking e sem pressa.
+const { PROFISSOES } = __r("js/professions/index.js");
+const { getEstado } = __r("js/core/storage.js");
+const { todosSelos } = __r("js/core/selos.js");
+const { esc, fmtData } = __r("js/core/ui.js");
+
+function htmlFigurinha(s, cor) {
+  const data = s.ok ? getEstado().selos[s.id] : '';
+  return s.ok
+    ? `<li class="figurinha ganha" style="--cor:${cor}"><span class="fig-emoji" aria-hidden="true">${esc(s.emoji)}</span><span class="fig-titulo">${esc(s.titulo)}</span>${data ? `<small>${esc(fmtData(data))}</small>` : ''}</li>`
+    : `<li class="figurinha bloqueada"><span class="fig-emoji" aria-hidden="true">❔</span><span class="fig-titulo">${esc(s.titulo)}</span><small>Ainda vai chegar!<span class="sr-only"> (você ainda não ganhou)</span></small></li>`;
+}
+
+function paginaAlbum() {
+  const selos = todosSelos();
+  const ganhos = selos.filter((s) => s.ok).length;
+  const grupos = [
+    ...PROFISSOES.map((p) => ({ id: p.id, titulo: `${p.emoji} ${p.nome}`, cor: p.cor })),
+    { id: 'geral', titulo: '🏙️ A cidade toda', cor: '#c2185b' },
+  ];
+  document.getElementById('app').innerHTML = `<section class="album">
+    <nav class="migalhas" aria-label="Você está aqui"><a href="#/">🏠 Início</a> › <span>Meu álbum</span></nav>
+    <h1 tabindex="-1">🌟 Meu álbum de selos</h1>
+    <p class="subtitulo">Você tem <strong>${ganhos}</strong> figurinhas. Elas aparecem quando você cadastra, atende e imprime. Sem pressa! 🌈</p>
+    ${grupos.map((g) => {
+      const lista = selos.filter((s) => s.grupo === g.id);
+      if (!lista.length) return '';
+      const n = lista.filter((s) => s.ok).length;
+      return `<section aria-labelledby="g-${g.id}"><h2 id="g-${g.id}">${esc(g.titulo)} <small>${n} de ${lista.length}</small></h2>
+        <ul class="figurinhas">${lista.map((s) => htmlFigurinha(s, g.cor)).join('')}</ul></section>`;
+    }).join('')}
+  </section>`;
+}
+
+__m.htmlFigurinha = htmlFigurinha;
+__m.paginaAlbum = paginaAlbum;
 };
 
 // ---- js/paginas/relatorio.js ----
@@ -1973,6 +2210,8 @@ const { esc, fmtData, hoje } = __r("js/core/ui.js");
 const AVISO = 'Documento de brincadeira. Não tem valor médico, legal ou oficial.';
 const AVISO_SAUDE = 'Se alguém estiver doente de verdade, chame um adulto.';
 
+const marcaAtual = () => getEstado().config.marca;
+
 // Número de "registro profissional" sempre fictício (derivado do nome, só para enfeitar).
 function numeroFicticio(prof, nome) {
   let h = 7;
@@ -1980,21 +2219,39 @@ function numeroFicticio(prof, nome) {
   return `${prof.sigla} ${String(h % 100000).padStart(5, '0')}`;
 }
 
-function logoSVG(prof, tam = 56) {
+// Cor dos documentos: a escolhida pela jogadora ou a da profissão.
+const corDocs = (prof, marca = marcaAtual()) => marca.corDocs || prof.cor;
+
+function logoSVG(prof, tam = 56, marca = marcaAtual()) {
+  const cor = corDocs(prof, marca);
+  const forma = marca.logoForma === 'circulo'
+    ? `<circle cx="32" cy="32" r="30" fill="${cor}"/>`
+    : `<rect x="2" y="2" width="60" height="60" rx="16" fill="${cor}"/>`;
   return `<svg class="logo" width="${tam}" height="${tam}" viewBox="0 0 64 64" role="img" aria-label="Logotipo de ${esc(prof.nome)}">
-    <rect x="2" y="2" width="60" height="60" rx="16" fill="${prof.cor}"/>
+    ${forma}
     <circle cx="32" cy="32" r="23" fill="#fff" opacity=".2"/>
-    <text x="32" y="43" font-size="29" text-anchor="middle">${prof.emoji}</text>
+    <text x="32" y="43" font-size="29" text-anchor="middle">${esc(marca.logoEmoji || prof.emoji)}</text>
   </svg>`;
 }
 
-function carimboSVG(prof) {
+// O carimbo SEMPRE diz "DE BRINCADEIRA"; só a primeira linha, o emoji, a forma e a cor mudam.
+function carimboSVG(prof, marca = marcaAtual()) {
+  const c = marca.carimboCor || corDocs(prof, marca);
+  const frase = esc((marca.carimboFrase || 'CARIMBO').toUpperCase());
+  const fs = (marca.carimboFrase || 'CARIMBO').length > 12 ? 7 : 10;
+  const emoji = esc(marca.carimboEmoji || prof.emoji);
+  const formas = {
+    redondo: `<circle cx="60" cy="60" r="55" fill="none" stroke="${c}" stroke-width="4"/><circle cx="60" cy="60" r="46" fill="none" stroke="${c}" stroke-width="1.6" stroke-dasharray="4 3"/>`,
+    oval: `<ellipse cx="60" cy="60" rx="56" ry="44" fill="none" stroke="${c}" stroke-width="4"/><ellipse cx="60" cy="60" rx="47" ry="35" fill="none" stroke="${c}" stroke-width="1.6" stroke-dasharray="4 3"/>`,
+    retangular: `<rect x="4" y="14" width="112" height="92" rx="14" fill="none" stroke="${c}" stroke-width="4"/><rect x="11" y="21" width="98" height="78" rx="9" fill="none" stroke="${c}" stroke-width="1.6" stroke-dasharray="4 3"/>`,
+    festivo: `<circle cx="60" cy="60" r="53" fill="none" stroke="${c}" stroke-width="8" stroke-dasharray="1 7" stroke-linecap="round"/><circle cx="60" cy="60" r="44" fill="none" stroke="${c}" stroke-width="2"/>`,
+  };
+  const baixo = marca.carimboForma === 'oval' ? 84 : 88;
   return `<svg class="carimbo" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
-    <circle cx="60" cy="60" r="55" fill="none" stroke="${prof.cor}" stroke-width="4"/>
-    <circle cx="60" cy="60" r="46" fill="none" stroke="${prof.cor}" stroke-width="1.6" stroke-dasharray="4 3"/>
-    <text x="60" y="40" font-size="10" font-weight="700" fill="${prof.cor}" text-anchor="middle">CARIMBO DE</text>
-    <text x="60" y="53" font-size="10" font-weight="700" fill="${prof.cor}" text-anchor="middle">BRINCADEIRA</text>
-    <text x="60" y="88" font-size="30" text-anchor="middle">${prof.emoji}</text>
+    ${formas[marca.carimboForma] || formas.redondo}
+    <text x="60" y="41" font-size="${fs}" font-weight="700" fill="${c}" text-anchor="middle">${frase}</text>
+    <text x="60" y="54" font-size="9" font-weight="700" fill="${c}" text-anchor="middle">DE BRINCADEIRA</text>
+    <text x="60" y="${baixo}" font-size="28" text-anchor="middle">${emoji}</text>
   </svg>`;
 }
 
@@ -2006,10 +2263,11 @@ function nomeJogadora() {
 function htmlFolha(prof, titulo, corpo) {
   const jog = nomeJogadora();
   const temNome = !!getEstado().config.jogadora;
+  const marca = marcaAtual();
   const avisoSaude = prof.saude ? `<p class="aviso-saude">${esc(AVISO_SAUDE)}</p>` : '';
-  return `<article class="folha" style="--cor:${prof.cor}">
+  return `<article class="folha timbre-${esc(marca.timbre)}" style="--cor:${corDocs(prof, marca)}">
     <header class="folha-cab">
-      ${logoSVG(prof, 60)}
+      ${logoSVG(prof, 60, marca)}
       <div class="folha-ident">
         <h2 class="folha-nome">${esc(prof.local)} ${esc(jog)}</h2>
         <p>${esc(prof.cargo)} ${esc(jog)} · ${esc(numeroFicticio(prof, jog))} <em>(registro fictício)</em></p>
@@ -2024,7 +2282,7 @@ function htmlFolha(prof, titulo, corpo) {
         <strong class="assinatura-nome">${temNome ? `${esc(prof.cargo)} ${esc(jog)}` : 'Nome da profissional'}</strong>
         <small>${esc(prof.nome)} · ${esc(numeroFicticio(prof, jog))} (registro fictício)</small>
       </div>
-      ${carimboSVG(prof)}
+      ${carimboSVG(prof, marca)}
     </div>
     <footer class="folha-rodape">
       <p class="aviso-brincadeira">${esc(AVISO)}</p>
@@ -2053,6 +2311,7 @@ __m.htmlFolha = htmlFolha;
 __m.imprimir = imprimir;
 __m.AVISO = AVISO;
 __m.AVISO_SAUDE = AVISO_SAUDE;
+__m.corDocs = corDocs;
 };
 
 // ---- js/paginas/config.js ----
@@ -2060,11 +2319,41 @@ __defs["js/paginas/config.js"] = function (__m, __r) {
 const { getEstado, salvar, substituirEstado, apagarTudo, CORES } = __r("js/core/storage.js");
 const { exportarBackup, lerBackup } = __r("js/core/backup.js");
 const { todosSelos } = __r("js/core/selos.js");
+const { PALETA, FORMAS_LOGO, FORMAS_CARIMBO, TIMBRES, AVATARES, EMOJIS_MARCA, normalizarMarca } = __r("js/core/marca.js");
+const { logoSVG, carimboSVG } = __r("js/core/imprimir.js");
+const { PROFISSOES } = __r("js/professions/index.js");
 const { aplicarAparencia } = __r("js/core/aparencia.js");
 const { esc, toast, confirmar } = __r("js/core/ui.js");
 const { navegar } = __r("js/core/roteador.js");
 
 const NOMES_COR = { rosa: '🌸 Rosa', lilas: '💜 Lilás', azul: '💙 Azul', verde: '💚 Verde', laranja: '🧡 Laranja' };
+
+const radio = (nome, valor, atual, conteudo, extra = '') =>
+  `<label class="chip${extra}"><input type="radio" name="${nome}" value="${esc(valor)}"${valor === atual ? ' checked' : ''}><span>${conteudo}</span></label>`;
+const radiosCor = (nome, atual, rotuloVazio) =>
+  radio(nome, '', atual, esc(rotuloVazio)) +
+  PALETA.map((p) => radio(nome, p.cor, atual, `<i class="amostra" style="background:${p.cor}"></i>${esc(p.nome)}`)).join('');
+const radiosEmoji = (nome, lista, atual, vazio) =>
+  (vazio ? radio(nome, '', atual, esc(vazio)) : '') + lista.map((e) => radio(nome, e, atual, esc(e), ' chip-emoji')).join('');
+
+function lerMarca(form) {
+  const v = (n) => { const el = form.querySelector(`input[name="${n}"]:checked`); return el ? el.value : ''; };
+  return normalizarMarca({
+    avatar: v('avatar'), logoEmoji: v('logoEmoji'), logoForma: v('logoForma'), corDocs: v('corDocs'),
+    carimboForma: v('carimboForma'), carimboCor: v('carimboCor'), carimboEmoji: v('carimboEmoji'),
+    carimboFrase: form.querySelector('#c-frase').value, timbre: v('timbre'),
+  });
+}
+
+function desenharPrevia(form) {
+  const marca = lerMarca(form);
+  const prof = PROFISSOES[0];
+  const nome = form.querySelector('#c-jog').value.trim() || 'Profissional Exemplo';
+  const cor = marca.corDocs || prof.cor;
+  document.getElementById('previa').innerHTML = `<div class="folha timbre-${marca.timbre}" style="--cor:${cor}">
+    <div class="folha-cab">${logoSVG(prof, 52, marca)}<div class="folha-ident"><h3 class="folha-nome">${esc(prof.local)} ${esc(nome)}</h3><p>${esc(prof.cargo)} ${esc(nome)}</p></div></div>
+    <div class="folha-assina"><p style="margin:0"><small>Assim ficam seus documentos</small></p>${carimboSVG(prof, marca)}</div></div>`;
+}
 
 function paginaConfig() {
   const { config } = getEstado();
@@ -2087,6 +2376,20 @@ function paginaConfig() {
           </div></fieldset>
         <fieldset class="campo"><legend>Cor de destaque</legend>
           <div class="chips">${CORES.map((c) => `<label class="chip"><input type="radio" name="cor" value="${c}"${config.cor === c ? ' checked' : ''}><span>${NOMES_COR[c]}</span></label>`).join('')}</div></fieldset>
+
+        <h2>Meu escritório</h2>
+        <p class="ajuda">Escolha como seu escritório aparece nos documentos. O carimbo sempre diz "de brincadeira".</p>
+        <div id="previa" class="previa" aria-live="polite"></div>
+        <fieldset class="campo"><legend>Meu avatar</legend><div class="chips">${radiosEmoji('avatar', AVATARES, config.marca.avatar)}</div></fieldset>
+        <fieldset class="campo"><legend>Cor dos documentos</legend><div class="chips">${radiosCor('corDocs', config.marca.corDocs, 'Cada profissão tem a sua')}</div></fieldset>
+        <fieldset class="campo"><legend>Logotipo: formato</legend><div class="chips">${FORMAS_LOGO.map(([k, n]) => radio('logoForma', k, config.marca.logoForma, n)).join('')}</div></fieldset>
+        <fieldset class="campo"><legend>Logotipo: emoji</legend><div class="chips">${radiosEmoji('logoEmoji', EMOJIS_MARCA, config.marca.logoEmoji, 'Da profissão')}</div></fieldset>
+        <fieldset class="campo"><legend>Papel timbrado</legend><div class="chips">${TIMBRES.map(([k, n]) => radio('timbre', k, config.marca.timbre, n)).join('')}</div></fieldset>
+        <fieldset class="campo"><legend>Carimbo: formato</legend><div class="chips">${FORMAS_CARIMBO.map(([k, n]) => radio('carimboForma', k, config.marca.carimboForma, n)).join('')}</div></fieldset>
+        <fieldset class="campo"><legend>Carimbo: cor</legend><div class="chips">${radiosCor('carimboCor', config.marca.carimboCor, 'Igual aos documentos')}</div></fieldset>
+        <fieldset class="campo"><legend>Carimbo: emoji</legend><div class="chips">${radiosEmoji('carimboEmoji', EMOJIS_MARCA, config.marca.carimboEmoji, 'Da profissão')}</div></fieldset>
+        <div class="campo"><label for="c-frase">Carimbo: frase (aparece acima de "DE BRINCADEIRA")</label>
+          <input id="c-frase" type="text" maxlength="18" value="${esc(config.marca.carimboFrase)}" placeholder="Ex.: APROVADO"></div>
         <button class="btn btn-primario" type="submit">💾 Salvar</button>
       </form>
 
@@ -2102,8 +2405,9 @@ function paginaConfig() {
       </section>
 
       <section class="cartao-bloco" aria-labelledby="t-selos">
-        <h2 id="t-selos">Selos (${selos.filter((s) => s.ok).length} de ${selos.length})</h2>
-        <ul class="selos">${selos.map((s) => `<li class="selo${s.ok ? '' : ' selo-bloqueado'}"><span aria-hidden="true">${s.ok ? s.emoji : '🔒'}</span> ${esc(s.titulo)}${s.ok ? '' : ' <span class="sr-only">(ainda não ganhou)</span>'}</li>`).join('')}</ul>
+        <h2 id="t-selos">Selos</h2>
+        <p>Você tem <strong>${selos.filter((s) => s.ok).length}</strong> de ${selos.length} figurinhas no álbum.</p>
+        <p><a class="btn" href="#/album">🌟 Abrir meu álbum de selos</a></p>
       </section>
 
       <section class="cartao-bloco" aria-labelledby="t-priv">
@@ -2122,12 +2426,16 @@ function paginaConfig() {
     c.escritorio = f.querySelector('#c-esc').value.trim() || 'Cidade das Profissões';
     c.tema = f.querySelector('input[name="tema"]:checked').value;
     c.cor = f.querySelector('input[name="cor"]:checked').value;
+    c.marca = lerMarca(f);
     salvar();
     aplicarAparencia();
     toast('Configurações salvas! ✨');
   });
   // Mostra a mudança de cor/tema na hora, antes de salvar
+  desenharPrevia(document.getElementById('form-config'));
+  document.getElementById('form-config').addEventListener('input', (ev) => desenharPrevia(ev.currentTarget));
   document.getElementById('form-config').addEventListener('change', (ev) => {
+    desenharPrevia(ev.currentTarget);
     if (ev.target.name === 'tema') document.documentElement.dataset.tema = ev.target.value;
     if (ev.target.name === 'cor') document.documentElement.dataset.cor = ev.target.value;
   });
@@ -2232,8 +2540,9 @@ const { entidadeDe, tituloReg, subtituloReg, nomeDe, criarCtx } = __r("js/core/m
 const { htmlFormulario, lerFormulario, ligarFormulario, formatarValor, htmlOdontograma, valorPadrao } = __r("js/core/formulario.js");
 const { htmlFolha, imprimir } = __r("js/core/imprimir.js");
 const { verificarSelos, incentivo } = __r("js/core/selos.js");
+const { semear, sortear } = __r("js/core/sorteio.js");
 const { navegar } = __r("js/core/roteador.js");
-const { esc, toast, confirmar, fmtRelativo } = __r("js/core/ui.js");
+const { esc, toast, confirmar, perguntaHtml } = __r("js/core/ui.js");
 
 const app = () => document.getElementById('app');
 const novoRotulo = (en) => `${en.f ? 'Nova' : 'Novo'} ${en.nome.toLowerCase()}`;
@@ -2269,23 +2578,6 @@ function botoesDoc(prof, reg, pequeno = true) {
     .map((d) => `<a class="btn ${pequeno ? 'btn-pequeno' : ''} btn-doc" href="#/p/${prof.id}/d/${reg.id}/${d.id}">${esc(d.botao || '🖨️ ' + d.titulo)}</a>`).join('');
 }
 
-function criarExemplo(prof) {
-  const semear = (item, pai) => {
-    const en = entidadeDe(prof, item.tipo);
-    const dados = { ...item.dados };
-    en.campos.forEach((c) => {
-      if (c.tipo !== 'secao' && (dados[c.nome] === undefined || dados[c.nome] === '')) {
-        const p = valorPadrao(c);
-        if (p !== '') dados[c.nome] = p;
-      }
-    });
-    const reg = criar(prof.id, item.tipo, dados, pai);
-    (item.filhos || []).forEach((f) => semear(f, reg.id));
-    return reg;
-  };
-  prof.exemplo.forEach((i) => semear(i));
-}
-
 // ---------- Escritório ----------
 function paginaEscritorio({ params }) {
   const prof = porId(params.prof);
@@ -2302,6 +2594,7 @@ function paginaEscritorio({ params }) {
     ${aviso(prof)}
     <div class="acoes">
       <a class="btn btn-primario" href="#/p/${prof.id}/novo/${raiz.id}">＋ ${esc(novoRotulo(raiz))}</a>
+      ${(prof.sorteios || []).length ? '<button class="btn" id="sortear" type="button">🎲 Sortear um caso</button>' : ''}
       ${regs.length === 0 && prof.exemplo ? '<button class="btn" id="exemplo" type="button">✨ Criar um exemplo</button>' : ''}
     </div>
     <h2>${esc(raiz.plural)} (${regs.length})</h2>
@@ -2313,7 +2606,28 @@ function paginaEscritorio({ params }) {
   </section>`;
 
   const ex = document.getElementById('exemplo');
-  if (ex) ex.addEventListener('click', () => { criarExemplo(prof); verificarSelos(); toast('Exemplo criado! ' + incentivo()); paginaEscritorio({ params }); });
+  if (ex) ex.addEventListener('click', () => { prof.exemplo.forEach((m) => semear(prof, m)); verificarSelos(); toast('Exemplo criado! ' + incentivo()); paginaEscritorio({ params }); });
+
+  const sorteio = document.getElementById('sortear');
+  if (sorteio) {
+    sorteio.addEventListener('click', async () => {
+      for (;;) {
+        const caso = sortear(prof);
+        const resp = await perguntaHtml('🎲 Chegou um caso novo!', `<p class="sorteio-pitch">${esc(caso.pitch)}</p><p class="ajuda">Você pode atender agora ou sortear outro.</p>`, [
+          { valor: 'outro', rotulo: '🎲 Outro caso' },
+          { valor: 'atender', rotulo: '✅ Atender!', primario: true },
+        ]);
+        if (resp === 'atender') {
+          const reg = semear(prof, caso);
+          verificarSelos();
+          toast('Caso aceito! ' + incentivo());
+          navegar(`/p/${prof.id}/r/${reg.id}`);
+          return;
+        }
+        if (resp !== 'outro') return;
+      }
+    });
+  }
 
   const busca = document.getElementById('busca');
   if (busca) {
@@ -2470,6 +2784,44 @@ __m.paginaEscritorio = paginaEscritorio;
 __m.paginaDetalhe = paginaDetalhe;
 __m.paginaForm = paginaForm;
 __m.paginaDocumento = paginaDocumento;
+};
+
+// ---- js/core/sorteio.js ----
+__defs["js/core/sorteio.js"] = function (__m, __r) {
+// Cria registros a partir de um "molde" (exemplo ou caso sorteado) e sorteia casos.
+const { criar } = __r("js/core/entidades.js");
+const { valorPadrao } = __r("js/core/formulario.js");
+const { entidadeDe } = __r("js/core/modelo.js");
+
+// molde = { tipo, dados, filhos?: [molde] }. Campos vazios recebem o valor padrão (ex.: data de hoje).
+function semear(prof, molde, pai) {
+  const en = entidadeDe(prof, molde.tipo);
+  const dados = { ...molde.dados };
+  en.campos.forEach((c) => {
+    if (c.tipo !== 'secao' && (dados[c.nome] === undefined || dados[c.nome] === '')) {
+      const p = valorPadrao(c);
+      if (p !== '') dados[c.nome] = p;
+    }
+  });
+  const reg = criar(prof.id, molde.tipo, dados, pai);
+  (molde.filhos || []).forEach((f) => semear(prof, f, reg.id));
+  return reg;
+}
+
+const ultimo = {};
+
+// Sorteia um caso diferente do anterior.
+function sortear(prof) {
+  const lista = prof.sorteios || [];
+  if (!lista.length) return null;
+  let i;
+  do { i = Math.floor(Math.random() * lista.length); } while (lista.length > 1 && i === ultimo[prof.id]);
+  ultimo[prof.id] = i;
+  return lista[i];
+}
+
+__m.semear = semear;
+__m.sortear = sortear;
 };
 
 __r("js/app.js");

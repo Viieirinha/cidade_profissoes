@@ -84,6 +84,13 @@ export default {
       },
     },
   ],
+  sorteios: [
+    { pitch: 'O gato Mingau derrubou o vaso e agora está com cara de inocente. 🐱', tipo: 'pet', dados: { nome: 'Mingau', emoji: '🐱', especie: 'Gato', tutor: 'Vovó Lu', idade: 3 }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Derrubou o vaso', 'Ronronando demais'], peso: 4.1 } }] },
+    { pitch: 'A hamster Pipoca não quer mais brincar na rodinha. 🐹', tipo: 'pet', dados: { nome: 'Pipoca', emoji: '🐹', especie: 'Hamster', tutor: 'Lia', idade: 1 }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Não quer brincar'], peso: 0.1 } }] },
+    { pitch: 'O cachorro Bolota está com latido de alegria e não para de abanar o rabinho! 🐶', tipo: 'pet', dados: { nome: 'Bolota', emoji: '🐶', especie: 'Cachorro', tutor: 'Theo', idade: 2 }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Latido de alegria', 'Rabinho balançando sem parar'], peso: 9 } }] },
+    { pitch: 'O dragãozinho Fumaça está espirrando faíscas de mentirinha. 🐉', tipo: 'pet', dados: { nome: 'Fumaça', emoji: '🐉', especie: 'Dragão de faz de conta', tutor: 'Capitã Estrela', idade: 100 }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Bigodinhos tortos'], sintomasLivre: 'Espirra faíscas coloridas.' } }] },
+    { pitch: 'O coelhinho de pelúcia Algodão está com a costura soltinha no bracinho. 🧸', tipo: 'pet', dados: { nome: 'Algodão', emoji: '🧸', especie: 'Ursinho de pelúcia', tutor: 'Bia', idade: 4 }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Costura soltinha (pelúcia)'], peso: 0.3 } }] },
+  ],
   exemplo: [{
     tipo: 'pet',
     dados: { nome: 'Mingau', emoji: '🐱', especie: 'Gato', tutor: 'Vovó Lu', idade: 3, obs: 'Derruba vasos por esporte.' },
