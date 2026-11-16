@@ -1,0 +1,102 @@
+import { getEstado, salvar, substituirEstado, apagarTudo, CORES } from '../core/storage.js';
+import { exportarBackup, lerBackup } from '../core/backup.js';
+import { todosSelos } from '../core/selos.js';
+import { aplicarAparencia } from '../core/aparencia.js';
+import { esc, toast, confirmar } from '../core/ui.js';
+import { navegar } from '../core/roteador.js';
+
+const NOMES_COR = { rosa: '🌸 Rosa', lilas: '💜 Lilás', azul: '💙 Azul', verde: '💚 Verde', laranja: '🧡 Laranja' };
+
+export function paginaConfig() {
+  const { config } = getEstado();
+  const selos = todosSelos();
+  document.getElementById('app').innerHTML = `
+    <section class="config">
+      <nav class="migalhas" aria-label="Você está aqui"><a href="#/">🏠 Início</a> › <span>Configurações</span></nav>
+      <h1 tabindex="-1">⚙️ Configurações</h1>
+
+      <form id="form-config" class="cartao-bloco">
+        <h2>Sobre você</h2>
+        <div class="campo"><label for="c-jog">Seu nome ou apelido</label>
+          <input id="c-jog" type="text" maxlength="40" value="${esc(config.jogadora)}" placeholder="Ex.: Dra. Lia"></div>
+        <div class="campo"><label for="c-esc">Nome da cidade ou do escritório</label>
+          <input id="c-esc" type="text" maxlength="60" value="${esc(config.escritorio)}"></div>
+        <fieldset class="campo"><legend>Modo de cores</legend>
+          <div class="chips">
+            <label class="chip"><input type="radio" name="tema" value="claro"${config.tema === 'claro' ? ' checked' : ''}><span>☀️ Claro</span></label>
+            <label class="chip"><input type="radio" name="tema" value="escuro"${config.tema === 'escuro' ? ' checked' : ''}><span>🌙 Escuro</span></label>
+          </div></fieldset>
+        <fieldset class="campo"><legend>Cor de destaque</legend>
+          <div class="chips">${CORES.map((c) => `<label class="chip"><input type="radio" name="cor" value="${c}"${config.cor === c ? ' checked' : ''}><span>${NOMES_COR[c]}</span></label>`).join('')}</div></fieldset>
+        <button class="btn btn-primario" type="submit">💾 Salvar</button>
+      </form>
+
+      <section class="cartao-bloco" aria-labelledby="t-backup">
+        <h2 id="t-backup">Backup dos dados</h2>
+        <p>Os dados ficam <strong>só neste aparelho</strong>. Guarde um backup para não perder nada ou para levar para outro aparelho.</p>
+        <div class="acoes">
+          <button class="btn" id="exportar" type="button">⬇️ Exportar backup</button>
+          <label class="btn" for="importar">⬆️ Importar backup</label>
+          <input id="importar" class="sr-only" type="file" accept="application/json,.json">
+        </div>
+        <p class="ajuda">Ao importar, os dados atuais deste aparelho são substituídos pelos do arquivo.</p>
+      </section>
+
+      <section class="cartao-bloco" aria-labelledby="t-selos">
+        <h2 id="t-selos">Selos (${selos.filter((s) => s.ok).length} de ${selos.length})</h2>
+        <ul class="selos">${selos.map((s) => `<li class="selo${s.ok ? '' : ' selo-bloqueado'}"><span aria-hidden="true">${s.ok ? s.emoji : '🔒'}</span> ${esc(s.titulo)}${s.ok ? '' : ' <span class="sr-only">(ainda não ganhou)</span>'}</li>`).join('')}</ul>
+      </section>
+
+      <section class="cartao-bloco" aria-labelledby="t-priv">
+        <h2 id="t-priv">Privacidade</h2>
+        <p>Nada é enviado pela internet. Use apelidos em vez de sobrenomes, endereços, telefones ou fotos reais.</p>
+        <p>Este é um jogo de faz de conta: os documentos não têm valor médico, legal ou oficial.</p>
+        <button class="btn btn-perigo-suave" id="apagar-tudo" type="button">🗑️ Apagar todos os dados</button>
+      </section>
+    </section>`;
+
+  document.getElementById('form-config').addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const f = ev.target;
+    const c = getEstado().config;
+    c.jogadora = f.querySelector('#c-jog').value.trim();
+    c.escritorio = f.querySelector('#c-esc').value.trim() || 'Cidade das Profissões';
+    c.tema = f.querySelector('input[name="tema"]:checked').value;
+    c.cor = f.querySelector('input[name="cor"]:checked').value;
+    salvar();
+    aplicarAparencia();
+    toast('Configurações salvas! ✨');
+  });
+  // Mostra a mudança de cor/tema na hora, antes de salvar
+  document.getElementById('form-config').addEventListener('change', (ev) => {
+    if (ev.target.name === 'tema') document.documentElement.dataset.tema = ev.target.value;
+    if (ev.target.name === 'cor') document.documentElement.dataset.cor = ev.target.value;
+  });
+
+  document.getElementById('exportar').addEventListener('click', () => { exportarBackup(); toast('Backup criado! Guarde o arquivo em um lugar seguro. 💾'); });
+
+  document.getElementById('importar').addEventListener('change', async (ev) => {
+    const arquivo = ev.target.files[0];
+    ev.target.value = '';
+    try {
+      const novo = await lerBackup(arquivo);
+      const n = novo.registros.length;
+      if (!(await confirmar(`Importar este backup (${n} ${n === 1 ? 'registro' : 'registros'})? Os dados atuais serão substituídos.`, { sim: 'Importar', perigo: true }))) return;
+      substituirEstado(novo);
+      aplicarAparencia();
+      toast('Backup restaurado! 🎉');
+      paginaConfig();
+    } catch (err) {
+      toast('😕 ' + err.message, 6000);
+    }
+  });
+
+  document.getElementById('apagar-tudo').addEventListener('click', async () => {
+    if (await confirmar('Apagar TODOS os dados deste aparelho? Isso não dá para desfazer (a não ser com um backup).', { sim: 'Apagar tudo', perigo: true })) {
+      apagarTudo();
+      aplicarAparencia();
+      toast('Tudo limpinho.');
+      navegar('/');
+    }
+  });
+}
