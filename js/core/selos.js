@@ -4,6 +4,7 @@ import { listar } from './entidades.js';
 import { PROFISSOES } from '../professions/index.js';
 import { toast } from './ui.js';
 import { confete } from './confete.js';
+import { tocar } from './som.js';
 
 const FRASES = [
   'Que trabalho lindo! ✨', 'Você está arrasando! 🌟', 'Mais um caso resolvido com carinho! 💖',
@@ -54,5 +55,6 @@ export function verificarSelos() {
   salvar();
   novos.forEach((s, i) => setTimeout(() => toast(`${s.emoji} Figurinha nova: ${s.titulo}`, 5000), i * 600));
   confete();
+  tocar('selo');
   return novos;
 }

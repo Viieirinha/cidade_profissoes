@@ -244,3 +244,13 @@ button.dente:hover { border-color: var(--destaque); }
 @keyframes cair { to { transform: translateY(105vh) rotate(var(--giro, 360deg)); opacity: .9; } }
 
 .sorteio-pitch { font-size: 1.15rem; font-weight: 700; margin: .4rem 0; }
+
+/* Sala de espera */
+.espera { list-style: none; margin: 0; padding: 0; display: grid; gap: .8rem; }
+.cliente { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem; animation: chegou .5s ease-out both; }
+.cliente-emoji { display: grid; place-items: center; width: 3.6rem; height: 3.6rem; border-radius: 50%; font-size: 2rem; flex: none;
+  background: var(--superficie); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor, var(--destaque)) 35%, transparent), 0 4px 0 color-mix(in srgb, var(--cor, var(--destaque)) 25%, transparent); }
+.balao { position: relative; flex: 1 1 220px; background: var(--superficie); border: 2px solid color-mix(in srgb, var(--cor, var(--destaque)) 45%, var(--borda)); border-radius: 20px 20px 20px 6px; padding: .5rem .9rem; box-shadow: var(--sombra); }
+.balao p { margin: .15rem 0 0; }
+.cliente-acoes { display: flex; flex-wrap: wrap; gap: .4rem; flex: 1 1 100%; justify-content: flex-end; }
+@keyframes chegou { from { opacity: 0; transform: translateX(-24px) scale(.96); } to { opacity: 1; transform: none; } }

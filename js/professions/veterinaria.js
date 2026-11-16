@@ -83,6 +83,27 @@ export default {
         </tbody></table>`;
       },
     },
+    {
+      id: 'ficha', titulo: 'Ficha do bichinho', de: 'pet', botao: '🖨️ Ficha do bichinho',
+      render: (c) => {
+        const cs = c.filhos('consulta');
+        const vs = c.filhos('vacina');
+        return `<p class="doc-campo" style="font-size:1.4rem">${c.e(c.d.emoji || '🐾')} <strong>${c.e(c.d.nome)}</strong></p>
+          ${c.campo('Espécie', c.d.especie)}${c.campo('Tutor(a)', c.d.tutor)}${c.bloco('Anotações', c.d.obs)}
+          <section class="doc-bloco"><h4>Consultas</h4>
+          <table class="doc-tabela"><thead><tr><th>Data</th><th>Sintomas</th><th>Diagnóstico</th></tr></thead><tbody>
+          ${cs.length ? cs.map((x) => `<tr><td>${c.e(c.data(x.dados.data))}</td><td>${c.e((x.dados.sintomas || []).join(', '))}</td><td>${c.e(x.dados.diagnostico || '')}</td></tr>`).join('') : '<tr><td colspan="3">Nenhuma consulta ainda.</td></tr>'}
+          </tbody></table></section>
+          <section class="doc-bloco"><h4>Vacinas de brincadeira</h4>${vs.length ? c.ul(vs.map((v) => `${v.dados.nome} (${c.data(v.dados.data)})`)) : '<p>—</p>'}</section>`;
+      },
+    },
+    {
+      id: 'medalha', titulo: 'Medalha de Bom Bichinho', de: 'pet', botao: '🖨️ Medalha',
+      render: (c) => `<p style="text-align:center;font-size:4rem;margin:.2rem">🏅</p>
+        <p style="text-align:center;font-size:1.3rem">A medalha de <strong>Bom Bichinho</strong> vai para</p>
+        <p style="text-align:center;font-size:2rem;margin:.3rem 0">${c.e(c.d.emoji || '🐾')} <strong>${c.e(c.d.nome)}</strong></p>
+        <p style="text-align:center">por ser muito fofo(a), corajoso(a) e ficar quietinho(a) na consulta!${c.d.tutor ? `<br>Tutor(a): ${c.e(c.d.tutor)}` : ''}</p>`,
+    },
   ],
   sorteios: [
     { pitch: 'O gato Mingau derrubou o vaso e agora está com cara de inocente. 🐱', tipo: 'pet', dados: { nome: 'Mingau', emoji: '🐱', especie: 'Gato', tutor: 'Vovó Lu', idade: 3 }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Derrubou o vaso', 'Ronronando demais'], peso: 4.1 } }] },

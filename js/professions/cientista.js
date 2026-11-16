@@ -44,6 +44,21 @@ export default {
           ${c.bloco('Conclusão', c.d.conclusao)}`;
       },
     },
+    {
+      id: 'cartaz', titulo: 'Cartaz da feira de ciências', de: 'experimento', botao: '🖨️ Cartaz da feira',
+      render: (c) => `<p style="text-align:center;font-size:3rem;margin:.2rem">🔬</p>
+        <p style="text-align:center;font-size:1.7rem;margin:.2rem"><strong>${c.e(c.d.titulo)}</strong></p>
+        ${c.bloco('Minha hipótese', c.d.hipotese)}
+        ${c.d.materiais && c.d.materiais.length ? `<section class="doc-bloco"><h4>Materiais</h4>${c.ul(c.d.materiais)}</section>` : ''}
+        ${c.campo('Resultado', c.d.resultado)}${c.bloco('O que descobri', c.d.conclusao)}`,
+    },
+    {
+      id: 'certificado', titulo: 'Certificado de Cientista Curiosa', de: 'experimento', botao: '🖨️ Certificado',
+      render: (c) => `<p style="text-align:center;font-size:3.4rem;margin:.2rem">🧪🌟</p>
+        <p style="text-align:center;font-size:1.2rem">Este certificado de brincadeira é entregue a quem fez o experimento</p>
+        <p style="text-align:center;font-size:1.8rem;margin:.3rem 0"><strong>${c.e(c.d.titulo)}</strong></p>
+        <p style="text-align:center">com curiosidade, paciência e muitas anotações! 📓</p>`,
+    },
   ],
   sorteios: [
     { pitch: 'Será que a planta gosta de música? 🌱', tipo: 'experimento', dados: { titulo: 'Será que a planta gosta de música?', hipotese: 'Acho que a plantinha vai crescer mais feliz ouvindo música.', materiais: ['Sementes', 'Caderno de anotações'] } },

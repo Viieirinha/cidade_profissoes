@@ -81,11 +81,12 @@ const ouvintesErro = [];
 function estadoInicial() {
   return {
     schema: VERSAO,
-    config: { jogadora: '', escritorio: 'Cidade das Profissões', tema: 'claro', cor: 'rosa', avisoVisto: false, marca: marcaPadrao() },
+    config: { jogadora: '', escritorio: 'Cidade das Profissões', tema: 'claro', cor: 'rosa', avisoVisto: false, marca: marcaPadrao(), sons: false, clientes: true },
     selos: {},
     contadores: { documentos: {} },
     registros: [],
     recentes: [],
+    espera: [],
   };
 }
 
@@ -110,6 +111,8 @@ function completar(e) {
       cor: CORES.includes(c.cor) ? c.cor : base.config.cor,
       avisoVisto: c.avisoVisto === true,
       marca: normalizarMarca(c.marca),
+      sons: c.sons === true,
+      clientes: c.clientes !== false,
     },
     selos: e && e.selos && typeof e.selos === 'object' ? e.selos : {},
     contadores: {
@@ -117,6 +120,10 @@ function completar(e) {
     },
     registros: Array.isArray(e && e.registros) ? e.registros : [],
     recentes: Array.isArray(e && e.recentes) ? e.recentes : [],
+    espera: (Array.isArray(e && e.espera) ? e.espera : [])
+      .filter((x) => x && typeof x.prof === 'string' && Number.isInteger(x.i) && typeof x.emoji === 'string')
+      .map((x) => ({ prof: x.prof, i: x.i, emoji: [...x.emoji].slice(0, 4).join(''), em: typeof x.em === 'string' ? x.em : '' }))
+      .slice(0, 30),
   };
 }
 
@@ -669,6 +676,24 @@ __m.default = {
         ${c.d.recomendacoes && c.d.recomendacoes.length ? `<section class="doc-bloco"><h4>Recomendações</h4>${c.ul(c.d.recomendacoes)}</section>` : ''}
         ${c.campo('Retorno', c.d.retorno ? c.data(c.d.retorno) : '')}`,
     },
+    {
+      id: 'cartao-retorno', titulo: 'Cartão de retorno', de: 'consulta', botao: '🖨️ Cartão de retorno',
+      render: (c) => `<p style="text-align:center;font-size:2.6rem;margin:.2rem">📅</p>
+        <p style="text-align:center;font-size:1.25rem"><strong>${c.e(c.dp.nome || '')}</strong>, a médica quer ver você de novo!</p>
+        <p style="text-align:center;font-size:1.5rem;margin:.6rem 0">${c.d.retorno ? `Volte em <strong>${c.e(c.data(c.d.retorno))}</strong>` : 'Volte sempre que quiser brincar!'}</p>
+        <p style="text-align:center">Traga um sorriso e o brinquedo favorito. 🧸</p>`,
+    },
+    {
+      id: 'ficha', titulo: 'Ficha do paciente', de: 'paciente', botao: '🖨️ Ficha do paciente',
+      render: (c) => {
+        const cs = c.filhos('consulta');
+        return `${c.campo('Paciente', c.d.nome)}${c.campo('Idade', c.d.idade !== '' && c.d.idade != null ? `${c.d.idade} anos` : '')}${c.campo('Tipo', c.d.tipo)}${c.bloco('Anotações', c.d.obs)}
+          <section class="doc-bloco"><h4>Histórico de consultas</h4>
+          <table class="doc-tabela"><thead><tr><th>Data</th><th>Sintomas</th><th>Diagnóstico</th></tr></thead><tbody>
+          ${cs.length ? cs.map((x) => `<tr><td>${c.e(c.data(x.dados.data))}</td><td>${c.e((x.dados.sintomas || []).join(', '))}</td><td>${c.e(x.dados.diagnostico || '')}</td></tr>`).join('') : '<tr><td colspan="3">Nenhuma consulta ainda.</td></tr>'}
+          </tbody></table></section>`;
+      },
+    },
   ],
   sorteios: [
     { pitch: 'Ursinho Teddy perdeu um botão do olho e está muito chateado. 🧸', tipo: 'paciente', dados: { nome: 'Ursinho Teddy', idade: 5, tipo: 'Ursinho de pelúcia', obs: 'Adora abraços.' }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Saudade do brinquedo favorito'], sintomasLivre: 'Perdeu um botão do olho.', temperatura: 36.5, batimentos: 90, peso: 1.2 } }] },
@@ -816,6 +841,27 @@ __m.default = {
         </tbody></table>`;
       },
     },
+    {
+      id: 'ficha', titulo: 'Ficha do bichinho', de: 'pet', botao: '🖨️ Ficha do bichinho',
+      render: (c) => {
+        const cs = c.filhos('consulta');
+        const vs = c.filhos('vacina');
+        return `<p class="doc-campo" style="font-size:1.4rem">${c.e(c.d.emoji || '🐾')} <strong>${c.e(c.d.nome)}</strong></p>
+          ${c.campo('Espécie', c.d.especie)}${c.campo('Tutor(a)', c.d.tutor)}${c.bloco('Anotações', c.d.obs)}
+          <section class="doc-bloco"><h4>Consultas</h4>
+          <table class="doc-tabela"><thead><tr><th>Data</th><th>Sintomas</th><th>Diagnóstico</th></tr></thead><tbody>
+          ${cs.length ? cs.map((x) => `<tr><td>${c.e(c.data(x.dados.data))}</td><td>${c.e((x.dados.sintomas || []).join(', '))}</td><td>${c.e(x.dados.diagnostico || '')}</td></tr>`).join('') : '<tr><td colspan="3">Nenhuma consulta ainda.</td></tr>'}
+          </tbody></table></section>
+          <section class="doc-bloco"><h4>Vacinas de brincadeira</h4>${vs.length ? c.ul(vs.map((v) => `${v.dados.nome} (${c.data(v.dados.data)})`)) : '<p>—</p>'}</section>`;
+      },
+    },
+    {
+      id: 'medalha', titulo: 'Medalha de Bom Bichinho', de: 'pet', botao: '🖨️ Medalha',
+      render: (c) => `<p style="text-align:center;font-size:4rem;margin:.2rem">🏅</p>
+        <p style="text-align:center;font-size:1.3rem">A medalha de <strong>Bom Bichinho</strong> vai para</p>
+        <p style="text-align:center;font-size:2rem;margin:.3rem 0">${c.e(c.d.emoji || '🐾')} <strong>${c.e(c.d.nome)}</strong></p>
+        <p style="text-align:center">por ser muito fofo(a), corajoso(a) e ficar quietinho(a) na consulta!${c.d.tutor ? `<br>Tutor(a): ${c.e(c.d.tutor)}` : ''}</p>`,
+    },
   ],
   sorteios: [
     { pitch: 'O gato Mingau derrubou o vaso e agora está com cara de inocente. 🐱', tipo: 'pet', dados: { nome: 'Mingau', emoji: '🐱', especie: 'Gato', tutor: 'Vovó Lu', idade: 3 }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Derrubou o vaso', 'Ronronando demais'], peso: 4.1 } }] },
@@ -903,6 +949,20 @@ __m.default = {
         ${c.campo('Paciente', c.d.nome)}${c.campo('Idade', c.d.idade !== '' && c.d.idade != null ? `${c.d.idade} anos` : '')}${c.campo('Tipo', c.d.tipo)}
         <section class="doc-bloco"><h4>Odontograma</h4>${htmlOdontograma(c.d.dentes, false)}</section>
         ${c.bloco('Anotações', c.d.obs)}`,
+    },
+    {
+      id: 'cartao-retorno', titulo: 'Cartão de retorno', de: 'consulta', botao: '🖨️ Cartão de retorno',
+      render: (c) => `<p style="text-align:center;font-size:2.6rem;margin:.2rem">🦷</p>
+        <p style="text-align:center;font-size:1.25rem"><strong>${c.e(c.dp.nome || '')}</strong>, seu próximo encontro com a Fada do Dente!</p>
+        <p style="text-align:center;font-size:1.5rem;margin:.6rem 0">${c.d.retorno ? `Volte em <strong>${c.e(c.data(c.d.retorno))}</strong>` : 'Volte quando quiser exibir seu sorriso!'}</p>
+        <p style="text-align:center">Não esqueça a escova e o melhor sorriso. 🪥😁</p>`,
+    },
+    {
+      id: 'certificado-sorriso', titulo: 'Certificado Sorriso Brilhante', de: 'paciente', botao: '🖨️ Certificado de sorriso',
+      render: (c) => `<p style="text-align:center;font-size:3.4rem;margin:.2rem">😁✨</p>
+        <p style="text-align:center;font-size:1.2rem">Este certificado de brincadeira é entregue a</p>
+        <p style="text-align:center;font-size:2rem;margin:.3rem 0"><strong>${c.e(c.d.nome)}</strong></p>
+        <p style="text-align:center">pelo <strong>Sorriso Mais Brilhante</strong> da clínica! 🌟</p>`,
     },
   ],
   sorteios: [
@@ -1241,6 +1301,20 @@ __m.default = {
           </tbody></table>`;
       },
     },
+    {
+      id: 'convite-audiencia', titulo: 'Convite para a audiência', de: 'audiencia', botao: '🖨️ Convite',
+      render: (c) => `<p style="text-align:center;font-size:2.6rem;margin:.2rem">💌</p>
+        <p style="text-align:center;font-size:1.2rem">Você está convidado(a) para a audiência do caso</p>
+        <p style="text-align:center;font-size:1.5rem;margin:.3rem 0"><strong>${c.e(c.d.caso || '')}</strong></p>
+        <p style="text-align:center;font-size:1.15rem">📅 ${c.e(c.data(c.d.data))}${c.d.hora ? ` às ${c.e(c.d.hora)}` : ''}<br>📍 ${c.e(c.d.local || 'Sala dos Casos Fofos')}</p>
+        <p style="text-align:center">Traga suas provas e seu melhor sorriso.</p>`,
+    },
+    {
+      id: 'contrato-amizade', titulo: 'Contrato de amizade e brincadeira', de: 'cliente', botao: '🖨️ Contrato de amizade',
+      render: (c) => `<p>Pelo presente contrato de brincadeira, <strong>${c.e(c.d.nome)}</strong> e a advogada combinam que:</p>
+        <ol class="doc-lista" style="font-size:1.05rem"><li>Os lanches serão divididos em partes iguais.</li><li>Segredos serão guardados a sete chaves.</li><li>Quem ganhar o jogo ajuda a guardar os brinquedos.</li><li>Pedir desculpas com um abraço resolve qualquer confusão.</li></ol>
+        <div style="display:flex;gap:2rem;margin-top:1.6rem"><div style="flex:1;border-top:1.5px solid #1d1a22;padding-top:.2rem"><small>${c.e(c.d.nome)}</small></div><div style="flex:1;border-top:1.5px solid #1d1a22;padding-top:.2rem"><small>Testemunha (um ursinho)</small></div></div>`,
+    },
   ],
   sorteios: [
     { pitch: 'O sumiço do brigadeiro: Dona Brigadeira acusa o gato Mingau. 🍫', tipo: 'cliente', dados: { nome: 'Dona Brigadeira', tipo: 'Empresa de brigadeiro' }, filhos: [{ tipo: 'caso', dados: { titulo: 'O sumiço do brigadeiro', autor: 'Dona Brigadeira', reu: 'Gato Mingau', fatos: 'O brigadeiro sumiu da bancada e só restaram migalhas de chocolate.', provas: ['Migalhas de chocolate', 'Pegadas de patinha'] } }] },
@@ -1311,6 +1385,22 @@ __m.default = {
         ${c.bloco('Fundamentos', c.d.fundamentos)}
         ${c.bloco('Decisão', c.d.decisao)}
         <p style="margin-top:1rem"><em>Assim decido. Publique-se, registre-se e brinque-se!</em></p>`,
+    },
+    {
+      id: 'convite-audiencia', titulo: 'Convite para a audiência', de: 'caso', botao: '🖨️ Convite',
+      render: (c) => `<p style="text-align:center;font-size:2.6rem;margin:.2rem">🔔</p>
+        <p style="text-align:center;font-size:1.2rem">A juíza convida as partes para a audiência do caso</p>
+        <p style="text-align:center;font-size:1.5rem;margin:.3rem 0"><strong>${c.e(c.d.titulo)}</strong></p>
+        <p style="text-align:center">${c.e([c.d.autor, c.d.reu].filter(Boolean).join(' × '))}</p>
+        <p style="text-align:center;font-size:1.15rem">📅 ${c.e(c.data(c.d.data))}</p>
+        <p style="text-align:center">Venham com calma e vontade de fazer as pazes. 🤝</p>`,
+    },
+    {
+      id: 'ata', titulo: 'Ata do julgamento', de: 'julgamento', botao: '🖨️ Ata',
+      render: (c) => `${c.campo('Caso', c.dp.titulo)}${c.campo('Partes', [c.dp.autor, c.dp.reu].filter(Boolean).join(' × '))}${c.campo('Data', c.data(c.d.data))}
+        ${c.bloco('Decisão em destaque', c.d.decisao)}
+        <p style="margin-top:.6rem">Todos ouviram com atenção e combinaram de fazer as pazes. 🤝</p>
+        <div style="display:flex;gap:2rem;margin-top:1.6rem"><div style="flex:1;border-top:1.5px solid #1d1a22;padding-top:.2rem"><small>${c.e(c.dp.autor || 'Parte 1')}</small></div><div style="flex:1;border-top:1.5px solid #1d1a22;padding-top:.2rem"><small>${c.e(c.dp.reu || 'Parte 2')}</small></div></div>`,
     },
   ],
   sorteios: [
@@ -1413,6 +1503,20 @@ __m.default = {
           ${alunas.map((a) => `<tr><td>${c.e(a.dados.nome)}</td><td>${(c.d.presentes || []).includes(a.id) ? '✅ Presente' : '⬜ Faltou'}</td></tr>`).join('')}
           </tbody></table>`;
       },
+    },
+    {
+      id: 'certificado', titulo: 'Certificado de Estrela da Turma', de: 'aluna', botao: '🖨️ Certificado',
+      render: (c) => `<p style="text-align:center;font-size:3.4rem;margin:.2rem">⭐</p>
+        <p style="text-align:center;font-size:1.2rem">Este certificado de brincadeira é entregue a</p>
+        <p style="text-align:center;font-size:2rem;margin:.3rem 0">${c.e(c.d.emoji || '')} <strong>${c.e(c.d.nome)}</strong></p>
+        <p style="text-align:center">da turma <strong>${c.e(c.dp.nome || '')}</strong>, por ser uma verdadeira <strong>Estrela da Turma</strong>! 🌟</p>`,
+    },
+    {
+      id: 'bilhete', titulo: 'Bilhete para casa', de: 'aluna', botao: '🖨️ Bilhete para casa',
+      render: (c) => `<p>Querida família de <strong>${c.e(c.d.nome)}</strong>,</p>
+        <p>Hoje foi um dia muito especial na turma ${c.e(c.dp.nome || '')}. Escreva abaixo um recado da professora:</p>
+        <div style="border-bottom:1.5px dotted #6b6278;height:2rem"></div><div style="border-bottom:1.5px dotted #6b6278;height:2rem"></div><div style="border-bottom:1.5px dotted #6b6278;height:2rem"></div>
+        <p style="margin-top:.8rem">Com carinho, ${c.e(c.prof.cargo)} 💛</p>`,
     },
   ],
   sorteios: [
@@ -1518,6 +1622,21 @@ __m.default = {
           }).join('')}`;
       },
     },
+    {
+      id: 'selo-prato', titulo: 'Prato nota 10', de: 'prato', botao: '🖨️ Selo nota 10',
+      render: (c) => `<p style="text-align:center;font-size:3.6rem;margin:.2rem">${c.e(c.d.emoji || '🍽️')}</p>
+        <p style="text-align:center;font-size:1.8rem;margin:.2rem"><strong>${c.e(c.d.nome)}</strong></p>
+        <p style="text-align:center;font-size:2.2rem;margin:.4rem 0">⭐⭐⭐⭐⭐ <strong>Nota 10!</strong></p>
+        <p style="text-align:center">Aprovado pela chef e por todos os clientes famintos. 😋</p>`,
+    },
+    {
+      id: 'convite', titulo: 'Convite para o restaurante', de: 'cardapio', botao: '🖨️ Convite',
+      render: (c) => `<p style="text-align:center;font-size:2.6rem;margin:.2rem">🍽️🎉</p>
+        <p style="text-align:center;font-size:1.2rem">Você está convidado(a) para jantar no</p>
+        <p style="text-align:center;font-size:1.8rem;margin:.3rem 0"><strong>${c.e(c.d.nome)}</strong></p>
+        <p style="text-align:center">${c.e(c.d.tema || '')}</p>
+        <p style="text-align:center">Mesa reservada, guardanapo de pano e muita fome de alegria!</p>`,
+    },
   ],
   sorteios: [
     { pitch: 'Abriu o Cantinho do Brigadeiro: doces de colher para todo mundo! 🍫', tipo: 'cardapio', dados: { nome: 'Cantinho do Brigadeiro', tema: 'Doces de mentirinha' }, filhos: [{ tipo: 'prato', dados: { nome: 'Brigadeiro de colher', emoji: '🍫', categoria: 'Sobremesa', preco: 6, ingredientes: 'Chocolate\nCarinho\nUma pitada de risada', modo: 'Misture tudo com capricho e sirva com um sorriso.' } }, { tipo: 'prato', dados: { nome: 'Suco de morango', emoji: '🍓', categoria: 'Bebida', preco: 4, ingredientes: 'Morangos\nGelo', modo: 'Bata tudo e sirva gelado.' } }] },
@@ -1614,6 +1733,20 @@ __m.default = {
           ${c.bloco('Conclusão', c.d.conclusao)}`;
       },
     },
+    {
+      id: 'cracha', titulo: 'Crachá de detetive', de: 'caso', botao: '🖨️ Crachá de detetive',
+      render: (c) => `<div style="max-width:320px;margin:.6rem auto;border:3px solid var(--cor);border-radius:18px;padding:1rem;text-align:center">
+        <p style="margin:0;font-weight:700;letter-spacing:.1em;color:var(--cor)">DETETIVE DE BRINCADEIRA</p>
+        <p style="font-size:3.4rem;margin:.3rem">🕵️‍♀️</p>
+        <p style="font-size:1.4rem;margin:0"><strong>${c.e(c.prof.cargo)}</strong></p>
+        <p style="margin:.2rem 0">Caso atual:<br><strong>${c.e(c.d.titulo)}</strong></p></div>`,
+    },
+    {
+      id: 'ficha-suspeito', titulo: 'Ficha do suspeito', de: 'suspeito', botao: '🖨️ Ficha do suspeito',
+      render: (c) => `<p style="font-size:3rem;margin:.2rem">${c.e(c.d.emoji || '🧐')}</p>
+        ${c.campo('Nome', c.d.nome)}${c.campo('Caso', c.dp.titulo)}${c.campo('Nível de suspeita', c.d.nivel)}${c.bloco('Álibi', c.d.alibi)}
+        <section class="doc-bloco"><h4>Pistas ligadas a este suspeito</h4>${c.ul(c.filhos('pista', c.pai.id).filter((p) => p.dados.suspeito === c.reg.id).map((p) => `${p.dados.emoji || ''} ${p.dados.descricao}`)) || '<p>—</p>'}</section>`,
+    },
   ],
   sorteios: [
     { pitch: 'O mistério do brigadeiro sumido na cozinha da vovó. 🍫', tipo: 'caso', dados: { titulo: 'O mistério do brigadeiro sumido', resumo: 'O brigadeiro da panela desapareceu durante a tarde.', local: 'Cozinha da vovó', status: 'Investigando' }, filhos: [{ tipo: 'suspeito', dados: { nome: 'Gato Mingau', emoji: '🐱', alibi: 'Estava dormindo no sofá.', nivel: 'Média' } }, { tipo: 'suspeito', dados: { nome: 'Papagaio Zeca', emoji: '🤖', alibi: 'Estava cantando no quintal.', nivel: 'Baixa' } }, { tipo: 'pista', dados: { descricao: 'Pegadas de patinha na farinha', emoji: '👣' } }, { tipo: 'pista', dados: { descricao: 'Migalhas de chocolate no tapete', emoji: '🍫' } }] },
@@ -1693,6 +1826,21 @@ __m.default = {
         <h4>${c.e(c.d.titulo)}</h4><p><em>${c.e(c.d.linhaFina || '')}</em></p></div>
         <p>${c.par(c.d.texto || '')}</p>${c.campo('Editoria', c.d.editoria)}`,
     },
+    {
+      id: 'cartaz-extra', titulo: 'Extra! Extra!', de: 'materia', botao: '🖨️ Cartaz Extra!',
+      render: (c) => `<p style="text-align:center;font-family:Georgia,serif;font-size:2.4rem;font-weight:700;margin:.2rem">EXTRA! EXTRA!</p>
+        <p style="text-align:center;font-size:3.4rem;margin:.2rem">${c.e(c.d.cena || '📰')}</p>
+        <p style="text-align:center;font-family:Georgia,serif;font-size:1.8rem;margin:.3rem 0"><strong>${c.e(c.d.titulo)}</strong></p>
+        <p style="text-align:center"><em>${c.e(c.d.linhaFina || '')}</em></p>`,
+    },
+    {
+      id: 'cracha-reporter', titulo: 'Crachá de repórter', de: 'edicao', botao: '🖨️ Crachá de repórter',
+      render: (c) => `<div style="max-width:320px;margin:.6rem auto;border:3px solid var(--cor);border-radius:18px;padding:1rem;text-align:center">
+        <p style="margin:0;font-weight:700;letter-spacing:.1em;color:var(--cor)">REPÓRTER DE BRINCADEIRA</p>
+        <p style="font-size:3.4rem;margin:.3rem">📰</p>
+        <p style="font-size:1.4rem;margin:0"><strong>${c.e(c.prof.cargo)}</strong></p>
+        <p style="margin:.2rem 0">Jornal:<br><strong>${c.e(c.d.nome)}</strong></p></div>`,
+    },
   ],
   sorteios: [
     { pitch: 'Primeira página: o gato derrubou o vaso, o bairro inteiro quer saber! 🐱', tipo: 'edicao', dados: { nome: 'O Diário da Cidade', lema: 'Notícias fofas todo dia' }, filhos: [{ tipo: 'materia', dados: { titulo: 'Gato derruba vaso e jura inocência', linhaFina: 'Testemunhas viram apenas um rabinho balançando.', cena: '🐱🌷', editoria: 'Bichinhos', destaque: 'Matéria principal' } }] },
@@ -1769,6 +1917,20 @@ __m.default = {
             <p style="margin:.2rem 0">${c.par(r.dados.texto || '')}</p>${(r.dados.descobertas || []).length ? `<small>Descobertas: ${c.e(r.dados.descobertas.join(', '))}</small>` : ''}</div>`).join('') : '<p>—</p>'}</section>`;
       },
     },
+    {
+      id: 'certificado', titulo: 'Certificado de missão cumprida', de: 'missao', botao: '🖨️ Certificado',
+      render: (c) => `<p style="text-align:center;font-size:3.4rem;margin:.2rem">🚀🌟</p>
+        <p style="text-align:center;font-size:1.2rem">Este certificado de brincadeira comemora a</p>
+        <p style="text-align:center;font-size:1.8rem;margin:.3rem 0"><strong>${c.e(c.d.nome)}</strong></p>
+        <p style="text-align:center">rumo a ${c.e(c.d.destino || 'um lugar incrível')}${c.d.nave ? ` a bordo do ${c.e(c.d.nave)}` : ''}. Missão cumprida com muita coragem!</p>`,
+    },
+    {
+      id: 'embarque', titulo: 'Cartão de embarque espacial', de: 'tripulante', botao: '🖨️ Cartão de embarque',
+      render: (c) => `<div style="max-width:420px;margin:.6rem auto;border:3px dashed var(--cor);border-radius:18px;padding:1rem">
+        <p style="margin:0;font-weight:700;letter-spacing:.1em;color:var(--cor)">EMBARQUE ESPACIAL</p>
+        <p style="font-size:1.6rem;margin:.3rem 0">${c.e(c.d.emoji || '🧑‍🚀')} <strong>${c.e(c.d.nome)}</strong></p>
+        ${c.campo('Função', c.d.funcao)}${c.campo('Missão', c.dp.nome)}${c.campo('Nave', c.dp.nave)}${c.campo('Destino', c.dp.destino)}</div>`,
+    },
   ],
   sorteios: [
     { pitch: 'Missão Estrela Cintilante: descobrir de onde vêm as estrelas cadentes. ⭐', tipo: 'missao', dados: { nome: 'Missão Estrela Cintilante', destino: 'Estrela Cintilante', nave: 'Foguete Arco-íris', objetivo: 'Descobrir de onde vêm as estrelas cadentes.' }, filhos: [{ tipo: 'tripulante', dados: { nome: 'Capitã Lia', emoji: '👩‍🚀', funcao: 'Comandante' } }, { tipo: 'tripulante', dados: { nome: 'Gato Astro', emoji: '🐱', funcao: 'Mascote' } }] },
@@ -1835,6 +1997,21 @@ __m.default = {
           ${c.campo('Resultado', c.d.resultado)}
           ${c.bloco('Conclusão', c.d.conclusao)}`;
       },
+    },
+    {
+      id: 'cartaz', titulo: 'Cartaz da feira de ciências', de: 'experimento', botao: '🖨️ Cartaz da feira',
+      render: (c) => `<p style="text-align:center;font-size:3rem;margin:.2rem">🔬</p>
+        <p style="text-align:center;font-size:1.7rem;margin:.2rem"><strong>${c.e(c.d.titulo)}</strong></p>
+        ${c.bloco('Minha hipótese', c.d.hipotese)}
+        ${c.d.materiais && c.d.materiais.length ? `<section class="doc-bloco"><h4>Materiais</h4>${c.ul(c.d.materiais)}</section>` : ''}
+        ${c.campo('Resultado', c.d.resultado)}${c.bloco('O que descobri', c.d.conclusao)}`,
+    },
+    {
+      id: 'certificado', titulo: 'Certificado de Cientista Curiosa', de: 'experimento', botao: '🖨️ Certificado',
+      render: (c) => `<p style="text-align:center;font-size:3.4rem;margin:.2rem">🧪🌟</p>
+        <p style="text-align:center;font-size:1.2rem">Este certificado de brincadeira é entregue a quem fez o experimento</p>
+        <p style="text-align:center;font-size:1.8rem;margin:.3rem 0"><strong>${c.e(c.d.titulo)}</strong></p>
+        <p style="text-align:center">com curiosidade, paciência e muitas anotações! 📓</p>`,
     },
   ],
   sorteios: [
@@ -2002,6 +2179,7 @@ const { listar } = __r("js/core/entidades.js");
 const { PROFISSOES } = __r("js/professions/index.js");
 const { toast } = __r("js/core/ui.js");
 const { confete } = __r("js/core/confete.js");
+const { tocar } = __r("js/core/som.js");
 
 const FRASES = [
   'Que trabalho lindo! ✨', 'Você está arrasando! 🌟', 'Mais um caso resolvido com carinho! 💖',
@@ -2052,6 +2230,7 @@ function verificarSelos() {
   salvar();
   novos.forEach((s, i) => setTimeout(() => toast(`${s.emoji} Figurinha nova: ${s.titulo}`, 5000), i * 600));
   confete();
+  tocar('selo');
   return novos;
 }
 
@@ -2090,6 +2269,62 @@ function confete(qtd = 36) {
 }
 
 __m.confete = confete;
+};
+
+// ---- js/core/som.js ----
+__defs["js/core/som.js"] = function (__m, __r) {
+// Sons suaves gerados no próprio aparelho (Web Audio, sem arquivos). Desligados por padrão.
+const { getEstado } = __r("js/core/storage.js");
+
+let ctx = null;
+
+function audio() {
+  if (!ctx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    ctx = new AC();
+  }
+  if (ctx.state === 'suspended') ctx.resume().catch(() => { /* sem gesto do usuário: segue em silêncio */ });
+  return ctx;
+}
+
+// Uma notinha curta com entrada e saída suaves (volume baixinho).
+function nota(freq, inicio, dur, { tipo = 'sine', vol = 0.05, ate = null } = {}) {
+  const c = audio();
+  if (!c) return;
+  const t0 = c.currentTime + inicio;
+  const osc = c.createOscillator();
+  const g = c.createGain();
+  osc.type = tipo;
+  osc.frequency.setValueAtTime(freq, t0);
+  if (ate) osc.frequency.exponentialRampToValueAtTime(ate, t0 + dur);
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(vol, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  osc.connect(g);
+  g.connect(c.destination);
+  osc.start(t0);
+  osc.stop(t0 + dur + 0.05);
+}
+
+const SONS = {
+  salvar: () => { nota(660, 0, 0.12); nota(880, 0.09, 0.2); },
+  sino: () => { nota(988, 0, 0.5, { tipo: 'triangle' }); nota(1319, 0.2, 0.6, { tipo: 'triangle' }); },
+  selo: () => [523, 659, 784, 1047].forEach((f, i) => nota(f, i * 0.1, 0.25, { tipo: 'triangle', vol: 0.055 })),
+  carimbo: () => nota(150, 0, 0.18, { tipo: 'sine', vol: 0.12, ate: 55 }),
+  sorteio: () => [0, 1, 2, 3, 4].forEach((i) => nota(500 + Math.random() * 500, i * 0.07, 0.06, { tipo: 'triangle', vol: 0.03 })),
+};
+
+const NOMES_SONS = Object.keys(SONS);
+
+// `forcar` toca mesmo com os sons desligados (usado no botão "Testar sons").
+function tocar(nome, forcar = false) {
+  if (!forcar && !getEstado().config.sons) return;
+  try { if (SONS[nome]) SONS[nome](); } catch (e) { /* som nunca pode quebrar o app */ }
+}
+
+__m.tocar = tocar;
+__m.NOMES_SONS = NOMES_SONS;
 };
 
 // ---- js/paginas/album.js ----
@@ -2142,6 +2377,7 @@ const { tituloReg } = __r("js/core/modelo.js");
 const { todosSelos, totalAtendimentos } = __r("js/core/selos.js");
 const { htmlFolha, imprimir } = __r("js/core/imprimir.js");
 const { esc, fmtData } = __r("js/core/ui.js");
+const { tocar } = __r("js/core/som.js");
 
 // "Profissional" fictícia só para o cabeçalho do relatório.
 const CIDADE = {
@@ -2195,7 +2431,7 @@ function paginaRelatorio() {
     ${htmlFolha(CIDADE, 'Relatório geral da cidade', corpo)}
   </section>`;
 
-  document.getElementById('imprimir').addEventListener('click', () => imprimir(document.getElementById('papel').value));
+  document.getElementById('imprimir').addEventListener('click', () => { tocar('carimbo'); imprimir(document.getElementById('papel').value); });
 }
 
 __m.paginaRelatorio = paginaRelatorio;
@@ -2325,6 +2561,7 @@ const { PROFISSOES } = __r("js/professions/index.js");
 const { aplicarAparencia } = __r("js/core/aparencia.js");
 const { esc, toast, confirmar } = __r("js/core/ui.js");
 const { navegar } = __r("js/core/roteador.js");
+const { tocar, NOMES_SONS } = __r("js/core/som.js");
 
 const NOMES_COR = { rosa: '🌸 Rosa', lilas: '💜 Lilás', azul: '💙 Azul', verde: '💚 Verde', laranja: '🧡 Laranja' };
 
@@ -2377,6 +2614,16 @@ function paginaConfig() {
         <fieldset class="campo"><legend>Cor de destaque</legend>
           <div class="chips">${CORES.map((c) => `<label class="chip"><input type="radio" name="cor" value="${c}"${config.cor === c ? ' checked' : ''}><span>${NOMES_COR[c]}</span></label>`).join('')}</div></fieldset>
 
+        <h2>Brincadeiras</h2>
+        <fieldset class="campo"><legend>O que acontece enquanto você brinca</legend>
+          <div class="chips">
+            <label class="chip"><input type="checkbox" name="clientes"${config.clientes ? ' checked' : ''}><span>🛎️ Clientes chegam sozinhos</span></label>
+            <label class="chip"><input type="checkbox" name="sons"${config.sons ? ' checked' : ''}><span>🔔 Sons suaves</span></label>
+          </div>
+          <p class="ajuda">Os sons são baixinhos e vêm desligados. Use "Testar" para ouvir.</p>
+          <div><button class="btn btn-pequeno" type="button" id="testar-sons">🔊 Testar sons</button></div>
+        </fieldset>
+
         <h2>Meu escritório</h2>
         <p class="ajuda">Escolha como seu escritório aparece nos documentos. O carimbo sempre diz "de brincadeira".</p>
         <div id="previa" class="previa" aria-live="polite"></div>
@@ -2427,11 +2674,16 @@ function paginaConfig() {
     c.tema = f.querySelector('input[name="tema"]:checked').value;
     c.cor = f.querySelector('input[name="cor"]:checked').value;
     c.marca = lerMarca(f);
+    c.clientes = f.querySelector('input[name="clientes"]').checked;
+    c.sons = f.querySelector('input[name="sons"]').checked;
     salvar();
     aplicarAparencia();
     toast('Configurações salvas! ✨');
   });
   // Mostra a mudança de cor/tema na hora, antes de salvar
+  document.getElementById('testar-sons').addEventListener('click', () => {
+    NOMES_SONS.forEach((n, i) => setTimeout(() => tocar(n, true), i * 900));
+  });
   desenharPrevia(document.getElementById('form-config'));
   document.getElementById('form-config').addEventListener('input', (ev) => desenharPrevia(ev.currentTarget));
   document.getElementById('form-config').addEventListener('change', (ev) => {
@@ -2541,6 +2793,8 @@ const { htmlFormulario, lerFormulario, ligarFormulario, formatarValor, htmlOdont
 const { htmlFolha, imprimir } = __r("js/core/imprimir.js");
 const { verificarSelos, incentivo } = __r("js/core/selos.js");
 const { semear, sortear } = __r("js/core/sorteio.js");
+const { fila, chegar, remover, casoDe, nomeDoCliente, MAX_ESPERA } = __r("js/core/espera.js");
+const { tocar } = __r("js/core/som.js");
 const { navegar } = __r("js/core/roteador.js");
 const { esc, toast, confirmar, perguntaHtml } = __r("js/core/ui.js");
 
@@ -2578,6 +2832,82 @@ function botoesDoc(prof, reg, pequeno = true) {
     .map((d) => `<a class="btn ${pequeno ? 'btn-pequeno' : ''} btn-doc" href="#/p/${prof.id}/d/${reg.id}/${d.id}">${esc(d.botao || '🖨️ ' + d.titulo)}</a>`).join('');
 }
 
+// ---------- Sala de espera ----------
+let timerChegada = null;
+
+function htmlEspera(prof) {
+  if (!(prof.sorteios || []).length) return '';
+  const f = fila(prof.id);
+  if (!getEstado().config.clientes && !f.length) return '';
+  const itens = f.map((c) => {
+    const caso = casoDe(prof, c);
+    const nome = nomeDoCliente(prof, caso);
+    const mostrarNome = !caso.pitch.toLowerCase().includes(nome.toLowerCase());
+    return `<li class="cliente" data-i="${c.i}">
+      <span class="cliente-emoji" aria-hidden="true">${esc(c.emoji)}</span>
+      <div class="balao">${mostrarNome ? `<strong>${esc(nome)}</strong>` : ''}<p>${esc(caso.pitch)}</p></div>
+      <div class="cliente-acoes">
+        <button class="btn btn-primario btn-pequeno" type="button" data-atender="${c.i}">✅ Atender</button>
+        <button class="btn btn-pequeno" type="button" data-adiar="${c.i}">⏳ Voltar depois</button>
+      </div></li>`;
+  }).join('');
+  return `<section id="espera" class="espera-secao" aria-labelledby="t-espera">
+    <h2 id="t-espera">🛎️ Sala de espera (${f.length})</h2>
+    ${f.length ? `<ul class="espera">${itens}</ul>` : '<p class="vazio-texto">Ninguém esperando agora. Fique de olho: alguém pode chegar! 👀</p>'}
+  </section>`;
+}
+
+function ligarEspera(prof) {
+  const sec = document.getElementById('espera');
+  if (!sec) return;
+  sec.addEventListener('click', (ev) => {
+    const b = ev.target.closest('button');
+    if (!b) return;
+    const idx = Number(b.dataset.atender ?? b.dataset.adiar);
+    const cliente = fila(prof.id).find((x) => x.i === idx);
+    if (!cliente) return;
+    if (b.dataset.atender !== undefined) {
+      const reg = semear(prof, casoDe(prof, cliente));
+      remover(cliente);
+      verificarSelos();
+      tocar('salvar');
+      toast('Cliente atendido! ' + incentivo());
+      navegar(`/p/${prof.id}/r/${reg.id}`);
+    } else {
+      remover(cliente);
+      toast('Tudo bem, volta outro dia! 💛');
+      atualizarEspera(prof);
+      agendarChegada(prof);
+    }
+  });
+}
+
+function atualizarEspera(prof) {
+  const atual = document.getElementById('espera');
+  if (!atual) return;
+  const tmp = document.createElement('div');
+  tmp.innerHTML = htmlEspera(prof);
+  atual.replaceWith(tmp.firstElementChild);
+  ligarEspera(prof);
+}
+
+// Alguém novo chega de tempos em tempos enquanto a pessoa está no escritório (no máximo 3 esperando).
+function agendarChegada(prof) {
+  clearTimeout(timerChegada);
+  if (!getEstado().config.clientes || !(prof.sorteios || []).length) return;
+  const n = fila(prof.id).length;
+  if (n >= MAX_ESPERA) return;
+  const delay = n === 0 ? 4000 + Math.random() * 3000 : 20000 + Math.random() * 15000;
+  timerChegada = setTimeout(() => {
+    if (location.hash !== `#/p/${prof.id}`) return;
+    if (!chegar(prof)) return;
+    atualizarEspera(prof);
+    toast('🛎️ Chegou alguém na sala de espera!');
+    tocar('sino');
+    agendarChegada(prof);
+  }, delay);
+}
+
 // ---------- Escritório ----------
 function paginaEscritorio({ params }) {
   const prof = porId(params.prof);
@@ -2597,6 +2927,7 @@ function paginaEscritorio({ params }) {
       ${(prof.sorteios || []).length ? '<button class="btn" id="sortear" type="button">🎲 Sortear um caso</button>' : ''}
       ${regs.length === 0 && prof.exemplo ? '<button class="btn" id="exemplo" type="button">✨ Criar um exemplo</button>' : ''}
     </div>
+    ${htmlEspera(prof)}
     <h2>${esc(raiz.plural)} (${regs.length})</h2>
     ${regs.length ? `<div class="campo busca"><label for="busca">Buscar</label><input id="busca" type="search" placeholder="🔍 Buscar em ${esc(raiz.plural.toLowerCase())}…"></div>` : ''}
     ${regs.length ? `<ul class="lista-itens" id="lista">${regs.map((r) => itemCartao(prof, r)).join('')}</ul>
@@ -2605,12 +2936,17 @@ function paginaEscritorio({ params }) {
     ${recentes.length ? `<h2>${esc(atend.plural)} recentes</h2><ul class="lista-itens">${recentes.map((r) => itemCartao(prof, r)).join('')}</ul>` : ''}
   </section>`;
 
+  clearTimeout(timerChegada);
+  ligarEspera(prof);
+  agendarChegada(prof);
+
   const ex = document.getElementById('exemplo');
   if (ex) ex.addEventListener('click', () => { prof.exemplo.forEach((m) => semear(prof, m)); verificarSelos(); toast('Exemplo criado! ' + incentivo()); paginaEscritorio({ params }); });
 
   const sorteio = document.getElementById('sortear');
   if (sorteio) {
     sorteio.addEventListener('click', async () => {
+      tocar('sorteio');
       for (;;) {
         const caso = sortear(prof);
         const resp = await perguntaHtml('🎲 Chegou um caso novo!', `<p class="sorteio-pitch">${esc(caso.pitch)}</p><p class="ajuda">Você pode atender agora ou sortear outro.</p>`, [
@@ -2620,6 +2956,7 @@ function paginaEscritorio({ params }) {
         if (resp === 'atender') {
           const reg = semear(prof, caso);
           verificarSelos();
+          tocar('salvar');
           toast('Caso aceito! ' + incentivo());
           navegar(`/p/${prof.id}/r/${reg.id}`);
           return;
@@ -2745,6 +3082,7 @@ function paginaForm({ params, query }) {
     const dados = lerFormulario(form, en.campos);
     const salvo = editando ? atualizar(reg.id, dados) : criar(prof.id, tipo, dados, paiId || undefined);
     verificarSelos();
+    tocar('salvar');
     const nome = getEstado().config.jogadora;
     toast(`${editando ? 'Salvo!' : 'Cadastrado!'} ${incentivo()}${nome ? ' ' + nome : ''}`.trim());
     navegar(`/p/${prof.id}/r/${salvo.id}`);
@@ -2774,6 +3112,7 @@ function paginaDocumento({ params }) {
   </section>`;
 
   document.getElementById('imprimir').addEventListener('click', () => {
+    tocar('carimbo');
     imprimir(document.getElementById('papel').value);
     contarDocumento(prof.id);
     verificarSelos();
@@ -2822,6 +3161,60 @@ function sortear(prof) {
 
 __m.semear = semear;
 __m.sortear = sortear;
+};
+
+// ---- js/core/espera.js ----
+__defs["js/core/espera.js"] = function (__m, __r) {
+// Sala de espera: clientes de faz de conta que "chegam sozinhos" pedindo atendimento.
+// Cada cliente vem de um caso de `prof.sorteios` (guardamos só o índice e um emoji).
+const { getEstado, salvar } = __r("js/core/storage.js");
+const { porId } = __r("js/professions/index.js");
+const { entidadeDe } = __r("js/core/modelo.js");
+
+const MAX_ESPERA = 3;
+const EMOJIS = ['🐱', '🐶', '🐰', '🐻', '🐼', '🦊', '🦄', '🐢', '🧸', '👵', '🧒', '🐸'];
+const sorteie = (n) => Math.floor(Math.random() * n);
+
+// Clientes esperando em uma profissão (ignora índices que não existem mais).
+function fila(profId) {
+  const p = porId(profId);
+  const n = p && p.sorteios ? p.sorteios.length : 0;
+  return getEstado().espera.filter((x) => x.prof === profId && x.i >= 0 && x.i < n);
+}
+
+function chegar(prof) {
+  const casos = prof.sorteios || [];
+  const atual = fila(prof.id);
+  if (!casos.length || atual.length >= MAX_ESPERA) return null;
+  const usados = new Set(atual.map((x) => x.i));
+  const livres = casos.map((_, i) => i).filter((i) => !usados.has(i));
+  if (!livres.length) return null;
+  const cliente = { prof: prof.id, i: livres[sorteie(livres.length)], emoji: EMOJIS[sorteie(EMOJIS.length)], em: new Date().toISOString() };
+  getEstado().espera.push(cliente);
+  salvar();
+  return cliente;
+}
+
+function remover(cliente) {
+  const e = getEstado();
+  e.espera = e.espera.filter((x) => x !== cliente);
+  salvar();
+}
+
+const casoDe = (prof, cliente) => prof.sorteios[cliente.i];
+
+// Nome para mostrar: o título do cadastro principal do caso (ex.: "Ursinho Teddy").
+function nomeDoCliente(prof, caso) {
+  const t = entidadeDe(prof, caso.tipo).titulo;
+  return (typeof t === 'string' && caso.dados[t]) || 'Alguém';
+}
+
+__m.fila = fila;
+__m.chegar = chegar;
+__m.remover = remover;
+__m.nomeDoCliente = nomeDoCliente;
+__m.MAX_ESPERA = MAX_ESPERA;
+__m.casoDe = casoDe;
 };
 
 __r("js/app.js");

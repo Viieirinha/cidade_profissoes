@@ -6,6 +6,7 @@ import { tituloReg } from '../core/modelo.js';
 import { todosSelos, totalAtendimentos } from '../core/selos.js';
 import { htmlFolha, imprimir } from '../core/imprimir.js';
 import { esc, fmtData } from '../core/ui.js';
+import { tocar } from '../core/som.js';
 
 // "Profissional" fictícia só para o cabeçalho do relatório.
 const CIDADE = {
@@ -59,5 +60,5 @@ export function paginaRelatorio() {
     ${htmlFolha(CIDADE, 'Relatório geral da cidade', corpo)}
   </section>`;
 
-  document.getElementById('imprimir').addEventListener('click', () => imprimir(document.getElementById('papel').value));
+  document.getElementById('imprimir').addEventListener('click', () => { tocar('carimbo'); imprimir(document.getElementById('papel').value); });
 }

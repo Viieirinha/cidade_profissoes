@@ -63,6 +63,9 @@ Todos os caminhos são relativos, então funciona em subpastas como `/NOME-DO-RE
 - **🎲 Sortear um caso:** cada escritório sorteia uma situação leve (o brigadeiro sumido, o gato e o vaso…) já com o cadastro pronto; é só atender e completar.
 - **🌟 Álbum de figurinhas:** os selos viram figurinhas por profissão, com confete ao ganhar uma (desligado para quem pede menos movimento). Sem ranking.
 - **Meu escritório (Configurações):** avatar, cor dos documentos, logotipo, carimbo (forma, cor, emoji e frase) e papel timbrado, com prévia na hora. O carimbo sempre diz "DE BRINCADEIRA".
+- **🛎️ Sala de espera:** enquanto a pessoa está num escritório, clientes de faz de conta chegam sozinhos pedindo atendimento (no máximo 3, sem pressa; dá para "voltar depois"). Dá para desligar em Configurações.
+- **🔔 Sons suaves:** sons curtinhos gerados no aparelho (salvar, sino, selo, carimbo, sorteio). Vêm **desligados**; há um botão de testar.
+- **📄 Mais modelos:** cartões de retorno, fichas, certificados, convites, crachás, cartazes e contrato de amizade, todos de brincadeira.
 - **📊 Relatório da cidade** na tela inicial, para imprimir ou salvar em PDF.
 
 ## Estrutura

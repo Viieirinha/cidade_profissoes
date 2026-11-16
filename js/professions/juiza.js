@@ -47,6 +47,22 @@ export default {
         ${c.bloco('Decisão', c.d.decisao)}
         <p style="margin-top:1rem"><em>Assim decido. Publique-se, registre-se e brinque-se!</em></p>`,
     },
+    {
+      id: 'convite-audiencia', titulo: 'Convite para a audiência', de: 'caso', botao: '🖨️ Convite',
+      render: (c) => `<p style="text-align:center;font-size:2.6rem;margin:.2rem">🔔</p>
+        <p style="text-align:center;font-size:1.2rem">A juíza convida as partes para a audiência do caso</p>
+        <p style="text-align:center;font-size:1.5rem;margin:.3rem 0"><strong>${c.e(c.d.titulo)}</strong></p>
+        <p style="text-align:center">${c.e([c.d.autor, c.d.reu].filter(Boolean).join(' × '))}</p>
+        <p style="text-align:center;font-size:1.15rem">📅 ${c.e(c.data(c.d.data))}</p>
+        <p style="text-align:center">Venham com calma e vontade de fazer as pazes. 🤝</p>`,
+    },
+    {
+      id: 'ata', titulo: 'Ata do julgamento', de: 'julgamento', botao: '🖨️ Ata',
+      render: (c) => `${c.campo('Caso', c.dp.titulo)}${c.campo('Partes', [c.dp.autor, c.dp.reu].filter(Boolean).join(' × '))}${c.campo('Data', c.data(c.d.data))}
+        ${c.bloco('Decisão em destaque', c.d.decisao)}
+        <p style="margin-top:.6rem">Todos ouviram com atenção e combinaram de fazer as pazes. 🤝</p>
+        <div style="display:flex;gap:2rem;margin-top:1.6rem"><div style="flex:1;border-top:1.5px solid #1d1a22;padding-top:.2rem"><small>${c.e(c.dp.autor || 'Parte 1')}</small></div><div style="flex:1;border-top:1.5px solid #1d1a22;padding-top:.2rem"><small>${c.e(c.dp.reu || 'Parte 2')}</small></div></div>`,
+    },
   ],
   sorteios: [
     { pitch: 'O gato e o vaso: o gato jura que foi o vento. 🐱', tipo: 'caso', dados: { titulo: 'O gato e o vaso', autor: 'Vovó Lu', reu: 'Gato Mingau', resumo: 'O vaso de flores apareceu no chão. O gato diz que foi o vento.', status: 'Na pauta' } },

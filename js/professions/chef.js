@@ -84,6 +84,21 @@ export default {
           }).join('')}`;
       },
     },
+    {
+      id: 'selo-prato', titulo: 'Prato nota 10', de: 'prato', botao: '🖨️ Selo nota 10',
+      render: (c) => `<p style="text-align:center;font-size:3.6rem;margin:.2rem">${c.e(c.d.emoji || '🍽️')}</p>
+        <p style="text-align:center;font-size:1.8rem;margin:.2rem"><strong>${c.e(c.d.nome)}</strong></p>
+        <p style="text-align:center;font-size:2.2rem;margin:.4rem 0">⭐⭐⭐⭐⭐ <strong>Nota 10!</strong></p>
+        <p style="text-align:center">Aprovado pela chef e por todos os clientes famintos. 😋</p>`,
+    },
+    {
+      id: 'convite', titulo: 'Convite para o restaurante', de: 'cardapio', botao: '🖨️ Convite',
+      render: (c) => `<p style="text-align:center;font-size:2.6rem;margin:.2rem">🍽️🎉</p>
+        <p style="text-align:center;font-size:1.2rem">Você está convidado(a) para jantar no</p>
+        <p style="text-align:center;font-size:1.8rem;margin:.3rem 0"><strong>${c.e(c.d.nome)}</strong></p>
+        <p style="text-align:center">${c.e(c.d.tema || '')}</p>
+        <p style="text-align:center">Mesa reservada, guardanapo de pano e muita fome de alegria!</p>`,
+    },
   ],
   sorteios: [
     { pitch: 'Abriu o Cantinho do Brigadeiro: doces de colher para todo mundo! 🍫', tipo: 'cardapio', dados: { nome: 'Cantinho do Brigadeiro', tema: 'Doces de mentirinha' }, filhos: [{ tipo: 'prato', dados: { nome: 'Brigadeiro de colher', emoji: '🍫', categoria: 'Sobremesa', preco: 6, ingredientes: 'Chocolate\nCarinho\nUma pitada de risada', modo: 'Misture tudo com capricho e sirva com um sorriso.' } }, { tipo: 'prato', dados: { nome: 'Suco de morango', emoji: '🍓', categoria: 'Bebida', preco: 4, ingredientes: 'Morangos\nGelo', modo: 'Bata tudo e sirva gelado.' } }] },

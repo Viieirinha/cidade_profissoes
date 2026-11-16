@@ -7,6 +7,8 @@ import { htmlFormulario, lerFormulario, ligarFormulario, formatarValor, htmlOdon
 import { htmlFolha, imprimir } from '../core/imprimir.js';
 import { verificarSelos, incentivo } from '../core/selos.js';
 import { semear, sortear } from '../core/sorteio.js';
+import { fila, chegar, remover, casoDe, nomeDoCliente, MAX_ESPERA } from '../core/espera.js';
+import { tocar } from '../core/som.js';
 import { navegar } from '../core/roteador.js';
 import { esc, toast, confirmar, perguntaHtml } from '../core/ui.js';
 
@@ -44,6 +46,82 @@ function botoesDoc(prof, reg, pequeno = true) {
     .map((d) => `<a class="btn ${pequeno ? 'btn-pequeno' : ''} btn-doc" href="#/p/${prof.id}/d/${reg.id}/${d.id}">${esc(d.botao || '🖨️ ' + d.titulo)}</a>`).join('');
 }
 
+// ---------- Sala de espera ----------
+let timerChegada = null;
+
+function htmlEspera(prof) {
+  if (!(prof.sorteios || []).length) return '';
+  const f = fila(prof.id);
+  if (!getEstado().config.clientes && !f.length) return '';
+  const itens = f.map((c) => {
+    const caso = casoDe(prof, c);
+    const nome = nomeDoCliente(prof, caso);
+    const mostrarNome = !caso.pitch.toLowerCase().includes(nome.toLowerCase());
+    return `<li class="cliente" data-i="${c.i}">
+      <span class="cliente-emoji" aria-hidden="true">${esc(c.emoji)}</span>
+      <div class="balao">${mostrarNome ? `<strong>${esc(nome)}</strong>` : ''}<p>${esc(caso.pitch)}</p></div>
+      <div class="cliente-acoes">
+        <button class="btn btn-primario btn-pequeno" type="button" data-atender="${c.i}">✅ Atender</button>
+        <button class="btn btn-pequeno" type="button" data-adiar="${c.i}">⏳ Voltar depois</button>
+      </div></li>`;
+  }).join('');
+  return `<section id="espera" class="espera-secao" aria-labelledby="t-espera">
+    <h2 id="t-espera">🛎️ Sala de espera (${f.length})</h2>
+    ${f.length ? `<ul class="espera">${itens}</ul>` : '<p class="vazio-texto">Ninguém esperando agora. Fique de olho: alguém pode chegar! 👀</p>'}
+  </section>`;
+}
+
+function ligarEspera(prof) {
+  const sec = document.getElementById('espera');
+  if (!sec) return;
+  sec.addEventListener('click', (ev) => {
+    const b = ev.target.closest('button');
+    if (!b) return;
+    const idx = Number(b.dataset.atender ?? b.dataset.adiar);
+    const cliente = fila(prof.id).find((x) => x.i === idx);
+    if (!cliente) return;
+    if (b.dataset.atender !== undefined) {
+      const reg = semear(prof, casoDe(prof, cliente));
+      remover(cliente);
+      verificarSelos();
+      tocar('salvar');
+      toast('Cliente atendido! ' + incentivo());
+      navegar(`/p/${prof.id}/r/${reg.id}`);
+    } else {
+      remover(cliente);
+      toast('Tudo bem, volta outro dia! 💛');
+      atualizarEspera(prof);
+      agendarChegada(prof);
+    }
+  });
+}
+
+function atualizarEspera(prof) {
+  const atual = document.getElementById('espera');
+  if (!atual) return;
+  const tmp = document.createElement('div');
+  tmp.innerHTML = htmlEspera(prof);
+  atual.replaceWith(tmp.firstElementChild);
+  ligarEspera(prof);
+}
+
+// Alguém novo chega de tempos em tempos enquanto a pessoa está no escritório (no máximo 3 esperando).
+function agendarChegada(prof) {
+  clearTimeout(timerChegada);
+  if (!getEstado().config.clientes || !(prof.sorteios || []).length) return;
+  const n = fila(prof.id).length;
+  if (n >= MAX_ESPERA) return;
+  const delay = n === 0 ? 4000 + Math.random() * 3000 : 20000 + Math.random() * 15000;
+  timerChegada = setTimeout(() => {
+    if (location.hash !== `#/p/${prof.id}`) return;
+    if (!chegar(prof)) return;
+    atualizarEspera(prof);
+    toast('🛎️ Chegou alguém na sala de espera!');
+    tocar('sino');
+    agendarChegada(prof);
+  }, delay);
+}
+
 // ---------- Escritório ----------
 export function paginaEscritorio({ params }) {
   const prof = porId(params.prof);
@@ -63,6 +141,7 @@ export function paginaEscritorio({ params }) {
       ${(prof.sorteios || []).length ? '<button class="btn" id="sortear" type="button">🎲 Sortear um caso</button>' : ''}
       ${regs.length === 0 && prof.exemplo ? '<button class="btn" id="exemplo" type="button">✨ Criar um exemplo</button>' : ''}
     </div>
+    ${htmlEspera(prof)}
     <h2>${esc(raiz.plural)} (${regs.length})</h2>
     ${regs.length ? `<div class="campo busca"><label for="busca">Buscar</label><input id="busca" type="search" placeholder="🔍 Buscar em ${esc(raiz.plural.toLowerCase())}…"></div>` : ''}
     ${regs.length ? `<ul class="lista-itens" id="lista">${regs.map((r) => itemCartao(prof, r)).join('')}</ul>
@@ -71,12 +150,17 @@ export function paginaEscritorio({ params }) {
     ${recentes.length ? `<h2>${esc(atend.plural)} recentes</h2><ul class="lista-itens">${recentes.map((r) => itemCartao(prof, r)).join('')}</ul>` : ''}
   </section>`;
 
+  clearTimeout(timerChegada);
+  ligarEspera(prof);
+  agendarChegada(prof);
+
   const ex = document.getElementById('exemplo');
   if (ex) ex.addEventListener('click', () => { prof.exemplo.forEach((m) => semear(prof, m)); verificarSelos(); toast('Exemplo criado! ' + incentivo()); paginaEscritorio({ params }); });
 
   const sorteio = document.getElementById('sortear');
   if (sorteio) {
     sorteio.addEventListener('click', async () => {
+      tocar('sorteio');
       for (;;) {
         const caso = sortear(prof);
         const resp = await perguntaHtml('🎲 Chegou um caso novo!', `<p class="sorteio-pitch">${esc(caso.pitch)}</p><p class="ajuda">Você pode atender agora ou sortear outro.</p>`, [
@@ -86,6 +170,7 @@ export function paginaEscritorio({ params }) {
         if (resp === 'atender') {
           const reg = semear(prof, caso);
           verificarSelos();
+          tocar('salvar');
           toast('Caso aceito! ' + incentivo());
           navegar(`/p/${prof.id}/r/${reg.id}`);
           return;
@@ -211,6 +296,7 @@ export function paginaForm({ params, query }) {
     const dados = lerFormulario(form, en.campos);
     const salvo = editando ? atualizar(reg.id, dados) : criar(prof.id, tipo, dados, paiId || undefined);
     verificarSelos();
+    tocar('salvar');
     const nome = getEstado().config.jogadora;
     toast(`${editando ? 'Salvo!' : 'Cadastrado!'} ${incentivo()}${nome ? ' ' + nome : ''}`.trim());
     navegar(`/p/${prof.id}/r/${salvo.id}`);
@@ -240,6 +326,7 @@ export function paginaDocumento({ params }) {
   </section>`;
 
   document.getElementById('imprimir').addEventListener('click', () => {
+    tocar('carimbo');
     imprimir(document.getElementById('papel').value);
     contarDocumento(prof.id);
     verificarSelos();

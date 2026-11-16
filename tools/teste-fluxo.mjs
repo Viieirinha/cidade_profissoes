@@ -24,6 +24,11 @@ async function rodar(nome, url) {
   console.log(`\n== ${nome} ==`);
   const browser = await chromium.launch();
   const ctx = await browser.newContext({ viewport: { width: 390, height: 800 }, acceptDownloads: true });
+  await ctx.addInitScript(() => {
+    window.__osc = 0;
+    const AC = window.AudioContext;
+    if (AC) { const o = AC.prototype.createOscillator; AC.prototype.createOscillator = function () { window.__osc++; return o.call(this); }; }
+  });
   const page = await ctx.newPage();
   const erros = [];
   const externas = [];
@@ -185,6 +190,56 @@ async function rodar(nome, url) {
   await page.reload();
   await page.waitForSelector('.folha');
   ok(await page.evaluate(() => window.__xss2) === undefined && (await page.getAttribute('.folha', 'style')).includes('#'), 'marca inválida é saneada (sem injeção)');
+
+  // Clientes que chegam sozinhos
+  await page.evaluate(() => {
+    const e = JSON.parse(localStorage.getItem('cidade-das-profissoes'));
+    e.espera = [{ prof: 'medica', i: 0, emoji: '🐱', em: '' }];
+    localStorage.setItem('cidade-das-profissoes', JSON.stringify(e));
+  });
+  await page.goto(`${url}#/p/medica`);
+  await page.reload();
+  await page.waitForSelector('.cliente');
+  ok((await page.locator('.cliente .balao').innerText()).includes('Ursinho Teddy'), 'cliente na sala de espera mostra nome e pedido');
+  await page.click('.cliente [data-atender]');
+  await page.waitForSelector('.detalhe');
+  ok(await page.evaluate(() => JSON.parse(localStorage.getItem('cidade-das-profissoes')).espera.filter((x) => x.prof === 'medica').length) === 0, 'atender tira o cliente da sala de espera e abre o caso');
+  await page.goto(`${url}#/p/detetive`);
+  await page.waitForSelector('.cliente', { timeout: 12000 });
+  ok(true, 'um cliente chega sozinho na sala de espera');
+  await page.click('.cliente [data-adiar]');
+  ok(await page.locator('.cliente').count() === 0, '"Voltar depois" dispensa o cliente com carinho');
+  await page.goto(`${url}#/config`);
+  await page.click('label.chip:has-text("Clientes chegam sozinhos")');
+  await page.click('#form-config button[type=submit]');
+  await page.goto(`${url}#/p/chef`);
+  await page.waitForTimeout(8500);
+  ok(await page.locator('.cliente').count() === 0, 'com a opção desligada ninguém chega sozinho');
+  await page.goto(`${url}#/config`);
+  await page.click('label.chip:has-text("Clientes chegam sozinhos")');
+  await page.click('#form-config button[type=submit]');
+
+  // Sons: desligados por padrão, tocam só quando ligados
+  await page.goto(`${url}#/p/cientista`);
+  await page.click('text=Novo experimento');
+  await page.fill('#f-titulo', 'Teste de som');
+  const antesSom = await page.evaluate(() => window.__osc);
+  await page.click('button[type=submit]');
+  await page.waitForSelector('.detalhe');
+  ok(await page.evaluate(() => window.__osc) === antesSom, 'sons desligados por padrão: nada toca');
+  await page.goto(`${url}#/config`);
+  await page.click('label.chip:has-text("Sons suaves")');
+  await page.click('#form-config button[type=submit]');
+  await page.goto(`${url}#/p/cientista`);
+  await page.click('text=Novo experimento');
+  await page.fill('#f-titulo', 'Teste de som 2');
+  const antes2 = await page.evaluate(() => window.__osc);
+  await page.click('button[type=submit]');
+  await page.waitForSelector('.detalhe');
+  ok(await page.evaluate(() => window.__osc) > antes2, 'com sons ligados, salvar toca um somzinho');
+  await page.goto(`${url}#/config`);
+  await page.click('label.chip:has-text("Sons suaves")');
+  await page.click('#form-config button[type=submit]');
 
   // Backup: exportar -> apagar -> importar
   await page.goto(`${url}#/config`);

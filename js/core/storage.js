@@ -15,11 +15,12 @@ const ouvintesErro = [];
 export function estadoInicial() {
   return {
     schema: VERSAO,
-    config: { jogadora: '', escritorio: 'Cidade das Profissões', tema: 'claro', cor: 'rosa', avisoVisto: false, marca: marcaPadrao() },
+    config: { jogadora: '', escritorio: 'Cidade das Profissões', tema: 'claro', cor: 'rosa', avisoVisto: false, marca: marcaPadrao(), sons: false, clientes: true },
     selos: {},
     contadores: { documentos: {} },
     registros: [],
     recentes: [],
+    espera: [],
   };
 }
 
@@ -44,6 +45,8 @@ function completar(e) {
       cor: CORES.includes(c.cor) ? c.cor : base.config.cor,
       avisoVisto: c.avisoVisto === true,
       marca: normalizarMarca(c.marca),
+      sons: c.sons === true,
+      clientes: c.clientes !== false,
     },
     selos: e && e.selos && typeof e.selos === 'object' ? e.selos : {},
     contadores: {
@@ -51,6 +54,10 @@ function completar(e) {
     },
     registros: Array.isArray(e && e.registros) ? e.registros : [],
     recentes: Array.isArray(e && e.recentes) ? e.recentes : [],
+    espera: (Array.isArray(e && e.espera) ? e.espera : [])
+      .filter((x) => x && typeof x.prof === 'string' && Number.isInteger(x.i) && typeof x.emoji === 'string')
+      .map((x) => ({ prof: x.prof, i: x.i, emoji: [...x.emoji].slice(0, 4).join(''), em: typeof x.em === 'string' ? x.em : '' }))
+      .slice(0, 30),
   };
 }
 

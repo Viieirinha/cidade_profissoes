@@ -73,6 +73,20 @@ export default {
           ${c.bloco('Conclusão', c.d.conclusao)}`;
       },
     },
+    {
+      id: 'cracha', titulo: 'Crachá de detetive', de: 'caso', botao: '🖨️ Crachá de detetive',
+      render: (c) => `<div style="max-width:320px;margin:.6rem auto;border:3px solid var(--cor);border-radius:18px;padding:1rem;text-align:center">
+        <p style="margin:0;font-weight:700;letter-spacing:.1em;color:var(--cor)">DETETIVE DE BRINCADEIRA</p>
+        <p style="font-size:3.4rem;margin:.3rem">🕵️‍♀️</p>
+        <p style="font-size:1.4rem;margin:0"><strong>${c.e(c.prof.cargo)}</strong></p>
+        <p style="margin:.2rem 0">Caso atual:<br><strong>${c.e(c.d.titulo)}</strong></p></div>`,
+    },
+    {
+      id: 'ficha-suspeito', titulo: 'Ficha do suspeito', de: 'suspeito', botao: '🖨️ Ficha do suspeito',
+      render: (c) => `<p style="font-size:3rem;margin:.2rem">${c.e(c.d.emoji || '🧐')}</p>
+        ${c.campo('Nome', c.d.nome)}${c.campo('Caso', c.dp.titulo)}${c.campo('Nível de suspeita', c.d.nivel)}${c.bloco('Álibi', c.d.alibi)}
+        <section class="doc-bloco"><h4>Pistas ligadas a este suspeito</h4>${c.ul(c.filhos('pista', c.pai.id).filter((p) => p.dados.suspeito === c.reg.id).map((p) => `${p.dados.emoji || ''} ${p.dados.descricao}`)) || '<p>—</p>'}</section>`,
+    },
   ],
   sorteios: [
     { pitch: 'O mistério do brigadeiro sumido na cozinha da vovó. 🍫', tipo: 'caso', dados: { titulo: 'O mistério do brigadeiro sumido', resumo: 'O brigadeiro da panela desapareceu durante a tarde.', local: 'Cozinha da vovó', status: 'Investigando' }, filhos: [{ tipo: 'suspeito', dados: { nome: 'Gato Mingau', emoji: '🐱', alibi: 'Estava dormindo no sofá.', nivel: 'Média' } }, { tipo: 'suspeito', dados: { nome: 'Papagaio Zeca', emoji: '🤖', alibi: 'Estava cantando no quintal.', nivel: 'Baixa' } }, { tipo: 'pista', dados: { descricao: 'Pegadas de patinha na farinha', emoji: '👣' } }, { tipo: 'pista', dados: { descricao: 'Migalhas de chocolate no tapete', emoji: '🍫' } }] },

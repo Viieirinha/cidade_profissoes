@@ -63,6 +63,20 @@ export default {
         <section class="doc-bloco"><h4>Odontograma</h4>${htmlOdontograma(c.d.dentes, false)}</section>
         ${c.bloco('Anotações', c.d.obs)}`,
     },
+    {
+      id: 'cartao-retorno', titulo: 'Cartão de retorno', de: 'consulta', botao: '🖨️ Cartão de retorno',
+      render: (c) => `<p style="text-align:center;font-size:2.6rem;margin:.2rem">🦷</p>
+        <p style="text-align:center;font-size:1.25rem"><strong>${c.e(c.dp.nome || '')}</strong>, seu próximo encontro com a Fada do Dente!</p>
+        <p style="text-align:center;font-size:1.5rem;margin:.6rem 0">${c.d.retorno ? `Volte em <strong>${c.e(c.data(c.d.retorno))}</strong>` : 'Volte quando quiser exibir seu sorriso!'}</p>
+        <p style="text-align:center">Não esqueça a escova e o melhor sorriso. 🪥😁</p>`,
+    },
+    {
+      id: 'certificado-sorriso', titulo: 'Certificado Sorriso Brilhante', de: 'paciente', botao: '🖨️ Certificado de sorriso',
+      render: (c) => `<p style="text-align:center;font-size:3.4rem;margin:.2rem">😁✨</p>
+        <p style="text-align:center;font-size:1.2rem">Este certificado de brincadeira é entregue a</p>
+        <p style="text-align:center;font-size:2rem;margin:.3rem 0"><strong>${c.e(c.d.nome)}</strong></p>
+        <p style="text-align:center">pelo <strong>Sorriso Mais Brilhante</strong> da clínica! 🌟</p>`,
+    },
   ],
   sorteios: [
     { pitch: 'A boneca Rosinha precisa de uma visita de rotina para o sorriso ficar brilhando. ✨', tipo: 'paciente', dados: { nome: 'Boneca Rosinha', idade: 7, tipo: 'Boneca', dentes: D({ 4: 'b', 5: 'b', 20: 'e' }) }, filhos: [{ tipo: 'consulta', dados: { motivo: ['Visita de rotina'] } }] },

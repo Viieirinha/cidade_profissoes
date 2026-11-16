@@ -53,6 +53,20 @@ export default {
             <p style="margin:.2rem 0">${c.par(r.dados.texto || '')}</p>${(r.dados.descobertas || []).length ? `<small>Descobertas: ${c.e(r.dados.descobertas.join(', '))}</small>` : ''}</div>`).join('') : '<p>—</p>'}</section>`;
       },
     },
+    {
+      id: 'certificado', titulo: 'Certificado de missão cumprida', de: 'missao', botao: '🖨️ Certificado',
+      render: (c) => `<p style="text-align:center;font-size:3.4rem;margin:.2rem">🚀🌟</p>
+        <p style="text-align:center;font-size:1.2rem">Este certificado de brincadeira comemora a</p>
+        <p style="text-align:center;font-size:1.8rem;margin:.3rem 0"><strong>${c.e(c.d.nome)}</strong></p>
+        <p style="text-align:center">rumo a ${c.e(c.d.destino || 'um lugar incrível')}${c.d.nave ? ` a bordo do ${c.e(c.d.nave)}` : ''}. Missão cumprida com muita coragem!</p>`,
+    },
+    {
+      id: 'embarque', titulo: 'Cartão de embarque espacial', de: 'tripulante', botao: '🖨️ Cartão de embarque',
+      render: (c) => `<div style="max-width:420px;margin:.6rem auto;border:3px dashed var(--cor);border-radius:18px;padding:1rem">
+        <p style="margin:0;font-weight:700;letter-spacing:.1em;color:var(--cor)">EMBARQUE ESPACIAL</p>
+        <p style="font-size:1.6rem;margin:.3rem 0">${c.e(c.d.emoji || '🧑‍🚀')} <strong>${c.e(c.d.nome)}</strong></p>
+        ${c.campo('Função', c.d.funcao)}${c.campo('Missão', c.dp.nome)}${c.campo('Nave', c.dp.nave)}${c.campo('Destino', c.dp.destino)}</div>`,
+    },
   ],
   sorteios: [
     { pitch: 'Missão Estrela Cintilante: descobrir de onde vêm as estrelas cadentes. ⭐', tipo: 'missao', dados: { nome: 'Missão Estrela Cintilante', destino: 'Estrela Cintilante', nave: 'Foguete Arco-íris', objetivo: 'Descobrir de onde vêm as estrelas cadentes.' }, filhos: [{ tipo: 'tripulante', dados: { nome: 'Capitã Lia', emoji: '👩‍🚀', funcao: 'Comandante' } }, { tipo: 'tripulante', dados: { nome: 'Gato Astro', emoji: '🐱', funcao: 'Mascote' } }] },

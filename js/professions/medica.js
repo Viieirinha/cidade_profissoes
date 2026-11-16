@@ -78,6 +78,24 @@ export default {
         ${c.d.recomendacoes && c.d.recomendacoes.length ? `<section class="doc-bloco"><h4>Recomendações</h4>${c.ul(c.d.recomendacoes)}</section>` : ''}
         ${c.campo('Retorno', c.d.retorno ? c.data(c.d.retorno) : '')}`,
     },
+    {
+      id: 'cartao-retorno', titulo: 'Cartão de retorno', de: 'consulta', botao: '🖨️ Cartão de retorno',
+      render: (c) => `<p style="text-align:center;font-size:2.6rem;margin:.2rem">📅</p>
+        <p style="text-align:center;font-size:1.25rem"><strong>${c.e(c.dp.nome || '')}</strong>, a médica quer ver você de novo!</p>
+        <p style="text-align:center;font-size:1.5rem;margin:.6rem 0">${c.d.retorno ? `Volte em <strong>${c.e(c.data(c.d.retorno))}</strong>` : 'Volte sempre que quiser brincar!'}</p>
+        <p style="text-align:center">Traga um sorriso e o brinquedo favorito. 🧸</p>`,
+    },
+    {
+      id: 'ficha', titulo: 'Ficha do paciente', de: 'paciente', botao: '🖨️ Ficha do paciente',
+      render: (c) => {
+        const cs = c.filhos('consulta');
+        return `${c.campo('Paciente', c.d.nome)}${c.campo('Idade', c.d.idade !== '' && c.d.idade != null ? `${c.d.idade} anos` : '')}${c.campo('Tipo', c.d.tipo)}${c.bloco('Anotações', c.d.obs)}
+          <section class="doc-bloco"><h4>Histórico de consultas</h4>
+          <table class="doc-tabela"><thead><tr><th>Data</th><th>Sintomas</th><th>Diagnóstico</th></tr></thead><tbody>
+          ${cs.length ? cs.map((x) => `<tr><td>${c.e(c.data(x.dados.data))}</td><td>${c.e((x.dados.sintomas || []).join(', '))}</td><td>${c.e(x.dados.diagnostico || '')}</td></tr>`).join('') : '<tr><td colspan="3">Nenhuma consulta ainda.</td></tr>'}
+          </tbody></table></section>`;
+      },
+    },
   ],
   sorteios: [
     { pitch: 'Ursinho Teddy perdeu um botão do olho e está muito chateado. 🧸', tipo: 'paciente', dados: { nome: 'Ursinho Teddy', idade: 5, tipo: 'Ursinho de pelúcia', obs: 'Adora abraços.' }, filhos: [{ tipo: 'consulta', dados: { sintomas: ['Saudade do brinquedo favorito'], sintomasLivre: 'Perdeu um botão do olho.', temperatura: 36.5, batimentos: 90, peso: 1.2 } }] },

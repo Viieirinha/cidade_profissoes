@@ -81,6 +81,20 @@ export default {
           </tbody></table>`;
       },
     },
+    {
+      id: 'certificado', titulo: 'Certificado de Estrela da Turma', de: 'aluna', botao: '🖨️ Certificado',
+      render: (c) => `<p style="text-align:center;font-size:3.4rem;margin:.2rem">⭐</p>
+        <p style="text-align:center;font-size:1.2rem">Este certificado de brincadeira é entregue a</p>
+        <p style="text-align:center;font-size:2rem;margin:.3rem 0">${c.e(c.d.emoji || '')} <strong>${c.e(c.d.nome)}</strong></p>
+        <p style="text-align:center">da turma <strong>${c.e(c.dp.nome || '')}</strong>, por ser uma verdadeira <strong>Estrela da Turma</strong>! 🌟</p>`,
+    },
+    {
+      id: 'bilhete', titulo: 'Bilhete para casa', de: 'aluna', botao: '🖨️ Bilhete para casa',
+      render: (c) => `<p>Querida família de <strong>${c.e(c.d.nome)}</strong>,</p>
+        <p>Hoje foi um dia muito especial na turma ${c.e(c.dp.nome || '')}. Escreva abaixo um recado da professora:</p>
+        <div style="border-bottom:1.5px dotted #6b6278;height:2rem"></div><div style="border-bottom:1.5px dotted #6b6278;height:2rem"></div><div style="border-bottom:1.5px dotted #6b6278;height:2rem"></div>
+        <p style="margin-top:.8rem">Com carinho, ${c.e(c.prof.cargo)} 💛</p>`,
+    },
   ],
   sorteios: [
     { pitch: 'Nova turma: a Turma das Estrelas chegou animada! ⭐', tipo: 'turma', dados: { nome: 'Turma das Estrelas', ano: '5º ano', materias: ['Português', 'Matemática', 'Ciências'] }, filhos: [{ tipo: 'aluna', dados: { nome: 'Lia', emoji: '👧' } }, { tipo: 'aluna', dados: { nome: 'Theo', emoji: '👦' } }, { tipo: 'aluna', dados: { nome: 'Bia', emoji: '🧒' } }] },

@@ -7,6 +7,7 @@ import { PROFISSOES } from '../professions/index.js';
 import { aplicarAparencia } from '../core/aparencia.js';
 import { esc, toast, confirmar } from '../core/ui.js';
 import { navegar } from '../core/roteador.js';
+import { tocar, NOMES_SONS } from '../core/som.js';
 
 const NOMES_COR = { rosa: '🌸 Rosa', lilas: '💜 Lilás', azul: '💙 Azul', verde: '💚 Verde', laranja: '🧡 Laranja' };
 
@@ -59,6 +60,16 @@ export function paginaConfig() {
         <fieldset class="campo"><legend>Cor de destaque</legend>
           <div class="chips">${CORES.map((c) => `<label class="chip"><input type="radio" name="cor" value="${c}"${config.cor === c ? ' checked' : ''}><span>${NOMES_COR[c]}</span></label>`).join('')}</div></fieldset>
 
+        <h2>Brincadeiras</h2>
+        <fieldset class="campo"><legend>O que acontece enquanto você brinca</legend>
+          <div class="chips">
+            <label class="chip"><input type="checkbox" name="clientes"${config.clientes ? ' checked' : ''}><span>🛎️ Clientes chegam sozinhos</span></label>
+            <label class="chip"><input type="checkbox" name="sons"${config.sons ? ' checked' : ''}><span>🔔 Sons suaves</span></label>
+          </div>
+          <p class="ajuda">Os sons são baixinhos e vêm desligados. Use "Testar" para ouvir.</p>
+          <div><button class="btn btn-pequeno" type="button" id="testar-sons">🔊 Testar sons</button></div>
+        </fieldset>
+
         <h2>Meu escritório</h2>
         <p class="ajuda">Escolha como seu escritório aparece nos documentos. O carimbo sempre diz "de brincadeira".</p>
         <div id="previa" class="previa" aria-live="polite"></div>
@@ -109,11 +120,16 @@ export function paginaConfig() {
     c.tema = f.querySelector('input[name="tema"]:checked').value;
     c.cor = f.querySelector('input[name="cor"]:checked').value;
     c.marca = lerMarca(f);
+    c.clientes = f.querySelector('input[name="clientes"]').checked;
+    c.sons = f.querySelector('input[name="sons"]').checked;
     salvar();
     aplicarAparencia();
     toast('Configurações salvas! ✨');
   });
   // Mostra a mudança de cor/tema na hora, antes de salvar
+  document.getElementById('testar-sons').addEventListener('click', () => {
+    NOMES_SONS.forEach((n, i) => setTimeout(() => tocar(n, true), i * 900));
+  });
   desenharPrevia(document.getElementById('form-config'));
   document.getElementById('form-config').addEventListener('input', (ev) => desenharPrevia(ev.currentTarget));
   document.getElementById('form-config').addEventListener('change', (ev) => {

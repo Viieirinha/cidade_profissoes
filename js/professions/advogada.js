@@ -65,6 +65,20 @@ export default {
           </tbody></table>`;
       },
     },
+    {
+      id: 'convite-audiencia', titulo: 'Convite para a audiência', de: 'audiencia', botao: '🖨️ Convite',
+      render: (c) => `<p style="text-align:center;font-size:2.6rem;margin:.2rem">💌</p>
+        <p style="text-align:center;font-size:1.2rem">Você está convidado(a) para a audiência do caso</p>
+        <p style="text-align:center;font-size:1.5rem;margin:.3rem 0"><strong>${c.e(c.d.caso || '')}</strong></p>
+        <p style="text-align:center;font-size:1.15rem">📅 ${c.e(c.data(c.d.data))}${c.d.hora ? ` às ${c.e(c.d.hora)}` : ''}<br>📍 ${c.e(c.d.local || 'Sala dos Casos Fofos')}</p>
+        <p style="text-align:center">Traga suas provas e seu melhor sorriso.</p>`,
+    },
+    {
+      id: 'contrato-amizade', titulo: 'Contrato de amizade e brincadeira', de: 'cliente', botao: '🖨️ Contrato de amizade',
+      render: (c) => `<p>Pelo presente contrato de brincadeira, <strong>${c.e(c.d.nome)}</strong> e a advogada combinam que:</p>
+        <ol class="doc-lista" style="font-size:1.05rem"><li>Os lanches serão divididos em partes iguais.</li><li>Segredos serão guardados a sete chaves.</li><li>Quem ganhar o jogo ajuda a guardar os brinquedos.</li><li>Pedir desculpas com um abraço resolve qualquer confusão.</li></ol>
+        <div style="display:flex;gap:2rem;margin-top:1.6rem"><div style="flex:1;border-top:1.5px solid #1d1a22;padding-top:.2rem"><small>${c.e(c.d.nome)}</small></div><div style="flex:1;border-top:1.5px solid #1d1a22;padding-top:.2rem"><small>Testemunha (um ursinho)</small></div></div>`,
+    },
   ],
   sorteios: [
     { pitch: 'O sumiço do brigadeiro: Dona Brigadeira acusa o gato Mingau. 🍫', tipo: 'cliente', dados: { nome: 'Dona Brigadeira', tipo: 'Empresa de brigadeiro' }, filhos: [{ tipo: 'caso', dados: { titulo: 'O sumiço do brigadeiro', autor: 'Dona Brigadeira', reu: 'Gato Mingau', fatos: 'O brigadeiro sumiu da bancada e só restaram migalhas de chocolate.', provas: ['Migalhas de chocolate', 'Pegadas de patinha'] } }] },

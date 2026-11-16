@@ -1,10 +1,10 @@
 /* Impressão / Salvar como PDF: só a folha do documento, sem menus. */
 @media print {
-  .nao-imprimir, .topo, .rodape-site, #toasts, .pular, dialog { display: none !important; }
+  .nao-imprimir, .topo, .rodape-site, #toasts, .confete, .pular, dialog { display: none !important; }
   html, body { background: #fff !important; color: #000 !important; min-height: 0; display: block; }
   main { max-width: none; padding: 0; margin: 0; }
   .folha {
-    box-shadow: none; border: 0; border-radius: 0; margin: 0; padding: 0; max-width: none; width: 100%;
+    box-shadow: none !important; border: 0; border-radius: 0; margin: 0; padding: 0; max-width: none; width: 100%;
     border-top: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
   .folha-cab { border-bottom: 3px solid var(--cor); }

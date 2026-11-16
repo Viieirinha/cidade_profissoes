@@ -55,6 +55,21 @@ export default {
         <h4>${c.e(c.d.titulo)}</h4><p><em>${c.e(c.d.linhaFina || '')}</em></p></div>
         <p>${c.par(c.d.texto || '')}</p>${c.campo('Editoria', c.d.editoria)}`,
     },
+    {
+      id: 'cartaz-extra', titulo: 'Extra! Extra!', de: 'materia', botao: '🖨️ Cartaz Extra!',
+      render: (c) => `<p style="text-align:center;font-family:Georgia,serif;font-size:2.4rem;font-weight:700;margin:.2rem">EXTRA! EXTRA!</p>
+        <p style="text-align:center;font-size:3.4rem;margin:.2rem">${c.e(c.d.cena || '📰')}</p>
+        <p style="text-align:center;font-family:Georgia,serif;font-size:1.8rem;margin:.3rem 0"><strong>${c.e(c.d.titulo)}</strong></p>
+        <p style="text-align:center"><em>${c.e(c.d.linhaFina || '')}</em></p>`,
+    },
+    {
+      id: 'cracha-reporter', titulo: 'Crachá de repórter', de: 'edicao', botao: '🖨️ Crachá de repórter',
+      render: (c) => `<div style="max-width:320px;margin:.6rem auto;border:3px solid var(--cor);border-radius:18px;padding:1rem;text-align:center">
+        <p style="margin:0;font-weight:700;letter-spacing:.1em;color:var(--cor)">REPÓRTER DE BRINCADEIRA</p>
+        <p style="font-size:3.4rem;margin:.3rem">📰</p>
+        <p style="font-size:1.4rem;margin:0"><strong>${c.e(c.prof.cargo)}</strong></p>
+        <p style="margin:.2rem 0">Jornal:<br><strong>${c.e(c.d.nome)}</strong></p></div>`,
+    },
   ],
   sorteios: [
     { pitch: 'Primeira página: o gato derrubou o vaso, o bairro inteiro quer saber! 🐱', tipo: 'edicao', dados: { nome: 'O Diário da Cidade', lema: 'Notícias fofas todo dia' }, filhos: [{ tipo: 'materia', dados: { titulo: 'Gato derruba vaso e jura inocência', linhaFina: 'Testemunhas viram apenas um rabinho balançando.', cena: '🐱🌷', editoria: 'Bichinhos', destaque: 'Matéria principal' } }] },
